@@ -2,49 +2,147 @@
 
 \usetheme[progressbar=frametitle]{metropolis}
 \usepackage{appendixnumberbeamer}
-
+\usepackage[utf8]{inputenc}
 \usepackage{booktabs}
 \usepackage[scale=2]{ccicons}
-
+\usepackage{proof}
 \usepackage{pgfplots}
 \usepgfplotslibrary{dateplot}
+
+
+\usepackage[T1]{fontenc}
+\usepackage{color}
+\usepackage{xcolor}
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\usepackage{listings}
+\lstset{%
+	numberstyle=\tiny,
+	numbersep=15pt,tabsize=4,
+	flexiblecolumns=true,
+	keywordstyle=\color{blue},
+	commentstyle=\color{dkgreen},
+	stringstyle=\color{mauve},
+	numberstyle=\tiny\color{gray},
+	language=Java,
+	breaklines=true,
+	breakatwhitespace=true,
+  showstringspaces=false,
+  aboveskip=1.2em,
+  belowskip=1.2em,
+  keywordstyle=\color{blue},
+  keywordsprefix={@},
+}
 
 \usepackage{xspace}
 \newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
 
-\title{Metropolis}
-\subtitle{A modern beamer theme}
+\title{Inferencia de facetas de declasificación}
+\subtitle{Propuesta de solución}
 % \date{\today}
 \date{}
-\author{Matthias Vogelgesang}
-\institute{Center for modern beamer themes}
+\author{Matías Meneses C.}
+\institute{}
 % \titlegraphic{\hfill\includegraphics[height=1.5cm]{logo.pdf}}
 
 \begin{document}
 
 \maketitle
 
-\begin{frame}{Table of contents}
+\begin{frame}{Índice de Contenidos}
   \setbeamertemplate{section in toc}[sections numbered]
   \tableofcontents[hideallsubsections]
 \end{frame}
 
-\section{Introduction}
+\section{Descripción y motivación del problema}
 
-\begin{frame}[fragile]{Metropolis}
-
-  The \themename theme is a Beamer theme with minimal visual noise
-  inspired by the \href{https://github.com/hsrmbeamertheme/hsrmbeamertheme}{\textsc{hsrm} Beamer
-  Theme} by Benjamin Weiss.
-
-  Enable the theme by loading
-
-  \begin{verbatim}    \documentclass{beamer}
-    \usetheme{metropolis}\end{verbatim}
-
-  Note, that you have to have Mozilla's \emph{Fira Sans} font and XeTeX
-  installed to enjoy this wonderful typography.
+\begin{frame}[fragile]{Descrpción y motivación del problema}
+  \begin{itemize}
+    \uncover<1->{\item Se quiere realizar inferencia de facetas públicas para facilitarle el trabajo al programador.}
+    \uncover<2->{\item Dado que Dart provee la inferencia de facetas privadas, el problema se denomina "Inferencia de facetas públicas (o de declasificación) dadas las facetas privadas".}
+  \end{itemize}
 \end{frame}
+
+\section{Consideraciones importantes}
+
+\begin{frame}[fragile]{Consideraciones importantes}
+
+  \begin{onlyenv}<1>
+    La inferencia global es un problema no decidible.
+    \begin{lstlisting}
+    class Person {
+      Person foo(Person a, Person b) {
+        return a.bar(b);
+      }
+
+      Person bar(Person a) {
+        return a.foo(a, this);
+      }
+    }
+    \end{lstlisting}
+  \end{onlyenv}
+  \begin{onlyenv}<2>
+    La inferencia global es un problema no decidible.
+    \begin{lstlisting}
+    class Person {
+      @??? Person foo(@PersonBar Person a, @PersonFoo Person b) {
+        return a.bar(b);
+      }
+
+      @??? Person bar(@PersonFoo Person a) {
+        return a.foo(a, this);
+      }
+    }
+    \end{lstlisting}
+  \end{onlyenv}
+
+  \begin{onlyenv}<3>
+    Se deben resolver constraints de subtyping, buscando "el mejor tipo" en cada una de las variables de tipo sin resolver.
+  \end{onlyenv}
+
+\end{frame}
+
+\section{Propuesta}
+\begin{frame}[fragile]{Propuesta}
+  \begin{onlyenv}<1>
+    Primero, se extiende el lenguaje base de Type-based relaxed noninterference para incluir referencias, instrucciones condicionales y secuencias de instrucciones.
+    \begin{verbatim}
+  e ::= v | e;e | e = e | if e then e else e | while e do e | e.m(e) | m(x)e
+  v ::= DV | x | [z: U => list(m(x)e)]
+  U ::= O | TVar
+  O ::= Obj(TVar). [list(m: U -> U)]
+
+  x variable
+  m method label
+  U public facet
+  DV Dart primitive value
+    \end{verbatim}
+  \end{onlyenv}
+
+  \begin{onlyenv}<2->
+    Luego, se escriben las reglas de inferencia, que generan un set de constraints para cada tipo de expresión.
+  \end{onlyenv}
+
+  \begin{onlyenv}<3>
+    \infer{$\Gamma, M, pc$}{}
+    \begin{verbatim}
+  (imp)
+
+  Γ, M, pc, pt |- e1 : t1 | C1
+  Γ, M, pc, pt |- e2 : t2 | C2
+  --------------------------------
+  Γ, M, pc |- e1;e2 : t | C2 U C1
+    \end{verbatim}
+  \end{onlyenv}
+
+  \begin{onlyenv}<4>
+    Regla de y
+  \end{onlyenv}
+
+\end{frame}
+
 \begin{frame}[fragile]{Sections}
   Sections group slides of the same topic
 
@@ -100,6 +198,8 @@
 	\end{alertblock}
 \end{frame}
 }
+
+
 
 \section{Elements}
 
