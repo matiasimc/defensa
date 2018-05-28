@@ -7,6 +7,8 @@
 \usepackage[scale=2]{ccicons}
 \usepackage{proof}
 \usepackage{pgfplots}
+\usepackage{fancyvrb}
+\usepackage{stackengine}
 \usepgfplotslibrary{dateplot}
 
 
@@ -19,16 +21,16 @@
 
 \usepackage{listings}
 \lstset{%
-	numberstyle=\tiny,
-	numbersep=15pt,tabsize=4,
-	flexiblecolumns=true,
-	keywordstyle=\color{blue},
-	commentstyle=\color{dkgreen},
-	stringstyle=\color{mauve},
-	numberstyle=\tiny\color{gray},
-	language=Java,
-	breaklines=true,
-	breakatwhitespace=true,
+  numberstyle=\tiny,
+  numbersep=15pt,tabsize=4,
+  flexiblecolumns=true,
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  numberstyle=\tiny\color{gray},
+  language=Java,
+  breaklines=true,
+  breakatwhitespace=true,
   showstringspaces=false,
   aboveskip=1.2em,
   belowskip=1.2em,
@@ -58,7 +60,7 @@
 
 \section{Descripción y motivación del problema}
 
-\begin{frame}[fragile]{Descrpción y motivación del problema}
+\begin{frame}[fragile]{Descripción y motivación del problema}
   \begin{itemize}
     \uncover<1->{\item Se quiere realizar inferencia de facetas públicas para facilitarle el trabajo al programador.}
     \uncover<2->{\item Dado que Dart provee la inferencia de facetas privadas, el problema se denomina "Inferencia de facetas públicas (o de declasificación) dadas las facetas privadas".}
@@ -70,7 +72,8 @@
 \begin{frame}[fragile]{Consideraciones importantes}
 
   \begin{onlyenv}<1>
-    La inferencia global es un problema no decidible.
+		\only<2-|handout:0>{\stepcounter{framenumber}}
+    La inferencia global es un problema no decidible, y la presencia de subtyping no mejora la situación.
     \begin{lstlisting}
     class Person {
       Person foo(Person a, Person b) {
@@ -84,7 +87,7 @@
     \end{lstlisting}
   \end{onlyenv}
   \begin{onlyenv}<2>
-    La inferencia global es un problema no decidible.
+    La inferencia global es un problema no decidible, y la presencia de subtyping no mejora la situación.
     \begin{lstlisting}
     class Person {
       @??? Person foo(@PersonBar Person a, @PersonFoo Person b) {
@@ -99,46 +102,149 @@
   \end{onlyenv}
 
   \begin{onlyenv}<3>
-    Se deben resolver constraints de subtyping, buscando "el mejor tipo" en cada una de las variables de tipo sin resolver.
+    Entonces, mejor le pedimos al usuario que especifique las facetas de declasificación de la firma de los métodos...
   \end{onlyenv}
 
 \end{frame}
 
-\section{Propuesta}
-\begin{frame}[fragile]{Propuesta}
+\section{Propuesta: Proceso iterativo de inferencia asistida}
+\begin{frame}[fragile]{Propuesta: Proceso iterativo de inferencia asistida}
+	\begin{itemize}
+		\uncover<1->{\item Paso 1: Inferir considerando solo las facetas de la firma de un metodo que están definidas.}
+		\uncover<2>{\item Pasos sucesivos: Utilizando las facetas inferidas en el paso 1 y las modificaciones del usuario, refinar las facetas cuando sea pertinente.}
+	\end{itemize}
+\end{frame}
+\begin{frame}[fragile]{Propuesta: Proceso iterativo de inferencia asistida}
+
+    \begin{columns}
+      \begin{column}{0.5\textwidth}
+				\begin{onlyenv}<1-2>
+					\only<2-|handout:0>{\stepcounter{framenumber}}
+    \begin{lstlisting}
+class Person {
+  void foo(Person a, Person b) {
+    a.bar(b);
+  }
+
+  void bar(Person p) {
+    p.baz(p);
+  }
+
+  void baz(Person p) {
+    print(p);
+  }
+}
+\end{lstlisting}
+\end{onlyenv}
+\begin{onlyenv}<3-4>
+\begin{lstlisting}
+class Person {
+  @void void foo(@PersonBar Person a, @Person Person b) {
+    a.bar(b);
+  }
+
+  @void void bar(@PersonBaz Person p) {
+    p.baz(p);
+  }
+
+  @void void baz(@Person Person p) {
+    print(p);
+  }
+}
+\end{lstlisting}
+\end{onlyenv}
+\begin{onlyenv}<5-6>
+\begin{lstlisting}
+class Person {
+  @void void foo(@PersonBar Person a, @PersonBaz Person b) {
+    a.bar(b);
+  }
+
+  @void void bar(@Person Person p) {
+    p.baz(p);
+  }
+
+  @void void baz(@Person Person p) {
+    print(p);
+  }
+}
+\end{lstlisting}
+\end{onlyenv}
+\begin{onlyenv}<7>
+\begin{lstlisting}
+class Person {
+  @void void foo(@PersonBar Person a, @Person Person b) {
+    a.bar(b);
+  }
+
+  @void void bar(@Person Person p) {
+    p.baz(p);
+  }
+
+  @void void baz(@Person Person p) {
+    print(p);
+  }
+}
+\end{lstlisting}
+\end{onlyenv}
+      \end{column}
+
+      \begin{column}{0.5\textwidth}  %%<--- here
+				\begin{onlyenv}<2>
+          \includegraphics[height=\fontcharht\font`\B*3]{img/bulb.png}
+					\colorbox{red!30}{Inferir facetas no definidas.}
+			\end{onlyenv}
+			\begin{onlyenv}<4,6>
+				\includegraphics[height=\fontcharht\font`\B*3]{img/bulb.png}
+				\colorbox{red!30}{Flujo no permitido. Refinar facetas.}
+		\end{onlyenv}
+		\begin{onlyenv}<7>
+			\colorbox{green!30}{No hay errores :)}
+	\end{onlyenv}
+      \end{column}
+    \end{columns}
+
+
+
+\end{frame}
+
+\begin{frame}[fragile]{Propuesta: Proceso iterativo de inferencia asistida}
+	\includegraphics[width=1.0\textwidth]{img/diagrama.png}
+\end{frame}
+
+\begin{frame}[fragile]{Propuesta: Formalización}
   \begin{onlyenv}<1>
     Primero, se extiende el lenguaje base de Type-based relaxed noninterference para incluir referencias, instrucciones condicionales y secuencias de instrucciones.
-    \begin{verbatim}
-  e ::= v | e;e | e = e | if e then e else e | while e do e | e.m(e) | m(x)e
+    \begin{Verbatim}[fontsize=\small]
+  e ::= v | e;e | e = e | if e then e else e | while e do e |
+        e.m(e) | m(x)e
   v ::= DV | x | [z: U => list(m(x)e)]
-  U ::= O | TVar
+  U ::= O | TVar | void
   O ::= Obj(TVar). [list(m: U -> U)]
 
   x variable
   m method label
   U public facet
   DV Dart primitive value
-    \end{verbatim}
+\end{Verbatim}
   \end{onlyenv}
 
   \begin{onlyenv}<2->
     Luego, se escriben las reglas de inferencia, que generan un set de constraints para cada tipo de expresión.
   \end{onlyenv}
-
   \begin{onlyenv}<3>
-    \infer{$\Gamma, M, pc$}{}
-    \begin{verbatim}
-  (imp)
+    \begin{center}
+      (seq)
+      \[\infer{\Gamma, M, pc, pt \vdash e1;e2 : t2\, |\, C2 \cup C1}{\Gamma, M, pc, pt \vdash e1 : t1\, |\, C1 \qquad \Gamma, M, pc, pt \vdash e1 : t1\, |\, C2}\]
+    \end{center}
 
-  Γ, M, pc, pt |- e1 : t1 | C1
-  Γ, M, pc, pt |- e2 : t2 | C2
-  --------------------------------
-  Γ, M, pc |- e1;e2 : t | C2 U C1
-    \end{verbatim}
   \end{onlyenv}
 
   \begin{onlyenv}<4>
-    Regla de y
+    \begin{center}
+      (if)
+      \[\infer{\Gamma, M, pc, pt \vdash \text{if e1 then e2 else e3} : t\, |\, \{t2 <: t\} \cup \{t3 <: t\} \cup C3 \cup C2 \cup \{t1 <: pc1\} \cup C1}{\stackanchor{$\Gamma, M, pc, pt \vdash e1 : t1\, |\, C1$}{\stackanchor{$\Gamma, M, pc1, pt \vdash e2 : t2\, |\, C2$}{$\Gamma, M, pc1, pt \vdash e3 : t3\, |\, C3$}}}\]
+    \end{center}
   \end{onlyenv}
 
 \end{frame}
@@ -154,48 +260,48 @@
 \section{Titleformats}
 
 \begin{frame}{Metropolis titleformats}
-	\themename supports 4 different titleformats:
-	\begin{itemize}
-		\item Regular
-		\item \textsc{Smallcaps}
-		\item \textsc{allsmallcaps}
-		\item ALLCAPS
-	\end{itemize}
-	They can either be set at once for every title type or individually.
+  \themename supports 4 different titleformats:
+  \begin{itemize}
+    \item Regular
+    \item \textsc{Smallcaps}
+    \item \textsc{allsmallcaps}
+    \item ALLCAPS
+  \end{itemize}
+  They can either be set at once for every title type or individually.
 \end{frame}
 
 {
     \metroset{titleformat frame=smallcaps}
 \begin{frame}{Small caps}
-	This frame uses the \texttt{smallcaps} titleformat.
+  This frame uses the \texttt{smallcaps} titleformat.
 
-	\begin{alertblock}{Potential Problems}
-		Be aware, that not every font supports small caps. If for example you typeset your presentation with pdfTeX and the Computer Modern Sans Serif font, every text in smallcaps will be typeset with the Computer Modern Serif font instead.
-	\end{alertblock}
+  \begin{alertblock}{Potential Problems}
+    Be aware, that not every font supports small caps. If for example you typeset your presentation with pdfTeX and the Computer Modern Sans Serif font, every text in smallcaps will be typeset with the Computer Modern Serif font instead.
+  \end{alertblock}
 \end{frame}
 }
 
 {
 \metroset{titleformat frame=allsmallcaps}
 \begin{frame}{All small caps}
-	This frame uses the \texttt{allsmallcaps} titleformat.
+  This frame uses the \texttt{allsmallcaps} titleformat.
 
-	\begin{alertblock}{Potential problems}
-		As this titleformat also uses smallcaps you face the same problems as with the \texttt{smallcaps} titleformat. Additionally this format can cause some other problems. Please refer to the documentation if you consider using it.
+  \begin{alertblock}{Potential problems}
+    As this titleformat also uses smallcaps you face the same problems as with the \texttt{smallcaps} titleformat. Additionally this format can cause some other problems. Please refer to the documentation if you consider using it.
 
-		As a rule of thumb: Just use it for plaintext-only titles.
-	\end{alertblock}
+    As a rule of thumb: Just use it for plaintext-only titles.
+  \end{alertblock}
 \end{frame}
 }
 
 {
 \metroset{titleformat frame=allcaps}
 \begin{frame}{All caps}
-	This frame uses the \texttt{allcaps} titleformat.
+  This frame uses the \texttt{allcaps} titleformat.
 
-	\begin{alertblock}{Potential Problems}
-		This titleformat is not as problematic as the \texttt{allsmallcaps} format, but basically suffers from the same deficiencies. So please have a look at the documentation if you want to use it.
-	\end{alertblock}
+  \begin{alertblock}{Potential Problems}
+    This titleformat is not as problematic as the \texttt{allsmallcaps} format, but basically suffers from the same deficiencies. So please have a look at the documentation if you want to use it.
+  \end{alertblock}
 \end{frame}
 }
 
