@@ -110,7 +110,18 @@
 \end{frame}
 
 \begin{frame}[fragile]{Inferencia Global Restringida}
-  Si una expresión exterior al método actual tiene una faceta pública no definida, entonces no se generará ninguna constraint (por defecto es \textit{bottom}).
+  Si una expresión exterior al método actual tiene una faceta pública no definida, entonces se considerará \texttt{top} para parámetros de métodos y variables, y \texttt{bottom} para tipos de retorno de métodos.
+
+  \begin{itemize}
+    \uncover<2->{\item Si el parámetro de un método es $\top$, entonces cualquier llamada $e1.m(e2)$ será válida, puesto que $t2 <: \top$.}
+    \uncover<3->{\item Si una variable es $\top$, entonces cualquier asignación $e1 = e2$ será válida, puesto que $t2 <: \top$.}
+    \uncover<4->{\item Si el tipo de retorno de un método es $\bot$, entonces cualquier asignación $e1 = e2.m(e3)$ será válida, puesto que  $\bot <: t1$}
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{Inferencia Global Restringida}
+
   \begin{onlyenv}<1>
 		\only<2-|handout:0>{\stepcounter{framenumber}}
     \begin{lstlisting}
@@ -128,7 +139,7 @@
   \begin{onlyenv}<2>
     \begin{lstlisting}
     class Person {
-      @Person Person foo(@PersonBar Person a, @Person Person b) {
+      @Person Person foo(@PersonBar Person a, @Top Person b) {
         return a.bar(b);
       }
 
@@ -338,7 +349,7 @@ T,U ::= O | TVar
 
 {\setbeamercolor{palette primary}{fg=black, bg=yellow}
 \begin{frame}[standout]
-  
+
 \end{frame}
 }
 
