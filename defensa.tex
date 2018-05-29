@@ -82,7 +82,7 @@
       }
 
       Person bar(Person a) {
-        return a.foo(a, this);
+        return a.foo(null, null);
       }
     }
     \end{lstlisting}
@@ -96,7 +96,7 @@
       }
 
       @??? Person bar(@PersonFoo Person a) {
-        return a.foo(a, this);
+        return a.foo(null, null);
       }
     }
     \end{lstlisting}
@@ -105,17 +105,17 @@
   \begin{onlyenv}<3->
     Podemos realizar inferencia local, exigiendo que la firma de los métodos se encuentre completamente anotada.
   \end{onlyenv}
-  \only<4>{Muy restrictivo!}
+  \only<4>{Mucho trabajo para el programador!}
 
 \end{frame}
 
 \begin{frame}[fragile]{Inferencia Global Restringida}
-  Si una expresión exterior al método actual tiene una faceta pública no definida, entonces se considerará \texttt{top} para parámetros de métodos y variables, y \texttt{bottom} para tipos de retorno de métodos.
+  Si una expresión exterior al método actual tiene una faceta pública no definida, entonces se infiere \texttt{top} para parámetros de métodos y variables, y \texttt{bottom} para tipos de retorno de métodos.
 
   \begin{itemize}
     \uncover<2->{\item Si el parámetro de un método es $\top$, entonces cualquier llamada $e1.m(e2)$ será válida, puesto que $t2 <: \top$.}
     \uncover<3->{\item Si una variable es $\top$, entonces cualquier asignación $e1 = e2$ será válida, puesto que $t2 <: \top$.}
-    \uncover<4->{\item Si el tipo de retorno de un método es $\bot$, entonces cualquier asignación $e1 = e2.m(e3)$ será válida, puesto que  $\bot <: t1$}
+    \uncover<4->{\item Si el tipo de retorno de un método es $\bot$, entonces cualquier asignación $e1 = e2.m(e3)$ será válida, puesto que  $\bot <: t1$. Además, si lo usamos como argumento, también cualquier expresión $e1.m1(e2.m2(e3))$ será valida.}
   \end{itemize}
 
 \end{frame}
@@ -131,7 +131,7 @@
       }
 
       Person bar(Person a) {
-        return a.foo(a, this);
+        return a.foo(null, null);
       }
     }
     \end{lstlisting}
@@ -144,7 +144,7 @@
       }
 
       @Person Person bar(@PersonFoo Person a) {
-        return a.foo(a, this);
+        return a.foo(null, null);
       }
     }
     \end{lstlisting}
@@ -157,7 +157,7 @@
       }
 
       @Person Person bar(@PersonFoo Person a) {
-        return a.foo(a, this);
+        return a.foo(null, null);
       }
     }
     \end{lstlisting}
@@ -193,7 +193,7 @@ class Person {
 \begin{onlyenv}<3-4>
 \begin{lstlisting}
 class Person {
-  @void void foo(@PersonBar Person a, @Person Person b) {
+  @void void foo(@PersonBar Person a, @Top Person b) {
     a.bar(b);
   }
 
