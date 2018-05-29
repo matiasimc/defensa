@@ -58,18 +58,19 @@
   \tableofcontents[hideallsubsections]
 \end{frame}
 
-\section{Descripción y motivación del problema}
+\section{Descripción del Problema}
 
-\begin{frame}[fragile]{Descripción y motivación del problema}
+\begin{frame}[fragile]{Descripción del Problema}
+  Se quiere implementar una herramienta de inferencia de facetas públicas para un sistema de tipos de dos facetas, en el contexto de information flow control.
   \begin{itemize}
-    \uncover<1->{\item Se quiere realizar inferencia de facetas públicas para facilitarle el trabajo al programador.}
-    \uncover<2->{\item Dado que Dart provee la inferencia de facetas privadas, el problema se denomina "Inferencia de facetas públicas (o de declasificación) dadas las facetas privadas".}
+    \uncover<2->{\item El objetivo es facilitar el trabajo al programador, evitando que anote manualmente las anotaciones y cree las interfaces respectivas.}
+    \uncover<3->{\item La faceta privada es dada.}
   \end{itemize}
 \end{frame}
 
-\section{Consideraciones importantes}
+\section{Inferencia Global vs Inferencia Local}
 
-\begin{frame}[fragile]{Consideraciones importantes}
+\begin{frame}[fragile]{Inferencia Global vs Inferencia Local}
 
   \begin{onlyenv}<1>
 		\only<2-|handout:0>{\stepcounter{framenumber}}
@@ -101,18 +102,60 @@
     \end{lstlisting}
   \end{onlyenv}
 
-  \begin{onlyenv}<3>
-    Entonces, mejor le pedimos al usuario que especifique las facetas de declasificación de la firma de los métodos...
+  \begin{onlyenv}<3->
+    Podemos realizar inferencia local, exigiendo que la firma de los métodos se encuentre completamente anotada.
   \end{onlyenv}
+  \only<4>{Muy restrictivo!}
 
+\end{frame}
+
+\begin{frame}[fragile]{Inferencia Global Restringida}
+  Si una expresión exterior al método actual tiene una faceta pública no definida, entonces no se generará ninguna constraint (por defecto es \textit{bottom}).
+  \begin{onlyenv}<1>
+		\only<2-|handout:0>{\stepcounter{framenumber}}
+    \begin{lstlisting}
+    class Person {
+      Person foo(Person a, Person b) {
+        return a.bar(b);
+      }
+
+      Person bar(Person a) {
+        return a.foo(a, this);
+      }
+    }
+    \end{lstlisting}
+  \end{onlyenv}
+  \begin{onlyenv}<2>
+    \begin{lstlisting}
+    class Person {
+      @Person Person foo(@PersonBar Person a, @Person Person b) {
+        return a.bar(b);
+      }
+
+      @Person Person bar(@PersonFoo Person a) {
+        return a.foo(a, this);
+      }
+    }
+    \end{lstlisting}
+  \end{onlyenv}
+    \begin{onlyenv}<3>
+    \begin{lstlisting}
+    class Person {
+      @Person Person foo(@PersonBar Person a, @PersonFoo Person b) {
+        return a.bar(b);
+      }
+
+      @Person Person bar(@PersonFoo Person a) {
+        return a.foo(a, this);
+      }
+    }
+    \end{lstlisting}
+  \end{onlyenv}
 \end{frame}
 
 \section{Propuesta: Proceso iterativo de inferencia asistida}
 \begin{frame}[fragile]{Propuesta: Proceso iterativo de inferencia asistida}
-	\begin{itemize}
-		\uncover<1->{\item Paso 1: Inferir considerando solo las facetas de la firma de un metodo que están definidas.}
-		\uncover<2>{\item Pasos sucesivos: Utilizando las facetas inferidas en el paso 1 y las modificaciones del usuario, refinar las facetas cuando sea pertinente.}
-	\end{itemize}
+  \includegraphics[width=1.0\textwidth]{img/diagrama.png}
 \end{frame}
 \begin{frame}[fragile]{Propuesta: Proceso iterativo de inferencia asistida}
 
@@ -208,17 +251,28 @@ class Person {
 
 \end{frame}
 
-\begin{frame}[fragile]{Propuesta: Proceso iterativo de inferencia asistida}
-	\includegraphics[width=1.0\textwidth]{img/diagrama.png}
-\end{frame}
-
 \begin{frame}[fragile]{Propuesta: Formalización}
+  Se extiende el lenguaje base de Type-based relaxed noninterference para adaptarlo a las necesidades y sintaxis de un subconjunto de Dart, incluyendo referencias, instrucciones condicionales y secuencias de instrucciones.
   \begin{onlyenv}<1>
-    Primero, se extiende el lenguaje base de Type-based relaxed noninterference para incluir referencias, instrucciones condicionales y secuencias de instrucciones.
+    \only<2-|handout:0>{\stepcounter{framenumber}}
     \begin{Verbatim}[fontsize=\small]
-  e ::= v | e;e | e = e | if e then e else e | while e do e |
-        e.m(e) | m(x)e
-  v ::= DV | x | [z: U => list(m(x)e)]
+  e ::= v | e.m(e) | x
+  v ::= [z: U => list(m(x)e)]
+T,U ::= O | TVar
+  O ::= Obj(TVar). [list(m: S -> S)]
+  S ::= T < U
+
+  x variable
+  m method label
+  S security type
+  U public facet, T private facet
+\end{Verbatim}
+  \end{onlyenv}
+    \begin{onlyenv}<2>
+    \begin{Verbatim}[fontsize=\small]
+  e ::= v | e.m(e) | x | e;e | e = e | if e then e else e |
+        while e do e | m(x)e
+  v ::= [z: U => list(m(x)e)] | DV
   U ::= O | TVar | void
   O ::= Obj(TVar). [list(m: U -> U)]
 
@@ -228,297 +282,63 @@ class Person {
   DV Dart primitive value
 \end{Verbatim}
   \end{onlyenv}
+\end{frame}
 
-  \begin{onlyenv}<2->
-    Luego, se escriben las reglas de inferencia, que generan un set de constraints para cada tipo de expresión.
+\begin{frame}[fragile]{Propuesta: Formalización}
+  \begin{onlyenv}<1->
+    \only<2-|handout:0>{\stepcounter{framenumber}}
+    Se escriben las reglas de inferencia, que generan un set de constraints a resolver.
   \end{onlyenv}
-  \begin{onlyenv}<3>
+  \begin{onlyenv}<2>
     \begin{center}
       (seq)
-      \[\infer{\Gamma, M, pc, pt \vdash e1;e2 : t2\, |\, C2 \cup C1}{\Gamma, M, pc, pt \vdash e1 : t1\, |\, C1 \qquad \Gamma, M, pc, pt \vdash e1 : t1\, |\, C2}\]
+      \[\infer{\Gamma, M, pc, pt2 \vdash e1;e2 : t2\, |\, C2 \cup C1}{\Gamma, M, pc, pt1 \vdash e1 : t1\, |\, C1 \qquad \Gamma, M, pc, pt2 \vdash e2 : t2\, |\, C2}\]
+    \end{center}
+
+  \end{onlyenv}
+
+  \begin{onlyenv}<3>
+    \begin{center}
+      (method)
+      \[\infer{\Gamma, M, pc, pt \vdash m(x)e : t3\, |\, \{t3 <: t2\} \cup C2 \cup C1}{\Gamma, M, pc, pt1 \vdash m : t1 \rightarrow t2\, |\, C1 \qquad \Gamma, M, pc, pt2 \vdash e : t3\, |\, C2}\]
     \end{center}
 
   \end{onlyenv}
 
   \begin{onlyenv}<4>
     \begin{center}
-      (if)
-      \[\infer{\Gamma, M, pc, pt \vdash \text{if e1 then e2 else e3} : t\, |\, \{t2 <: t\} \cup \{t3 <: t\} \cup C3 \cup C2 \cup \{t1 <: pc1\} \cup C1}{\stackanchor{$\Gamma, M, pc, pt \vdash e1 : t1\, |\, C1$}{\stackanchor{$\Gamma, M, pc1, pt \vdash e2 : t2\, |\, C2$}{$\Gamma, M, pc1, pt \vdash e3 : t3\, |\, C3$}}}\]
+      (assn)
+      \[\infer{\Gamma, M, pc, pt \vdash e1 = e2 : void\, |\, \{t2 <: t1\} \cup \{pc <: t1\} \cup C2 \cup C1}{\Gamma, M, pc, pt1 \vdash e1 : t1\, |\, C1 \qquad \Gamma, M, pc, pt2 \vdash e2 : t2\, |\, C2}\]
     \end{center}
   \end{onlyenv}
 
+  \begin{onlyenv}<5>
+    \begin{center}
+      (if)
+      \[\infer{\Gamma, M, pc, pt \vdash \text{if e1 then e2 else e3} : t\, |\, \{t2 <: t\} \cup \{t3 <: t\} \cup C3 \cup C2 \cup \{t1 <: pc1\} \cup C1}{\stackanchor{$\Gamma, M, pc, pt1 \vdash e1 : t1\, |\, C1$}{\stackanchor{$\Gamma, M, pc1, pt2 \vdash e2 : t2\, |\, C2$}{$\Gamma, M, pc1, pt3 \vdash e3 : t3\, |\, C3$}}}\]
+    \end{center}
+  \end{onlyenv}
+
+  \begin{onlyenv}<6>
+    \begin{center}
+      (call)
+      \[\infer{\Gamma, M, pc, pt \vdash e1.m(e2) : t4\, |\, \{t2 <: t3\} \cup \{t1 <: [[m: t3 \rightarrow t4]]\} \cup C2 \cup C1}{\Gamma, M, pc, pt1 \vdash e1 : Obj(t1). [[m : t3 \rightarrow t4]]\, |\, C1 \qquad \Gamma, M, pc, pt2 \vdash e2 : t2\, |\, C2}\]
+    \end{center}
+  \end{onlyenv}
 \end{frame}
 
-\begin{frame}[fragile]{Sections}
-  Sections group slides of the same topic
-
-  \begin{verbatim}    \section{Elements}\end{verbatim}
-
-  for which \themename provides a nice progress indicator \ldots
-\end{frame}
-
-\section{Titleformats}
-
-\begin{frame}{Metropolis titleformats}
-  \themename supports 4 different titleformats:
+\section{Resolución de Constraints}
+\begin{frame}[fragile]{Resolución de Constraints}
+  Para resolver las constraints se usan los operadores \texttt{join} ($\lor$) y \texttt{meet} ($\land$) en la lattice que forman las facetas de declasificación.
   \begin{itemize}
-    \item Regular
-    \item \textsc{Smallcaps}
-    \item \textsc{allsmallcaps}
-    \item ALLCAPS
+    \item{$\{t1 <: t2\}, \{t1 <: t3\} \implies \{t1 <: t2 \land t3 \} $}
+    \item{$\{t2 <: t1\}, \{t3 <: t1\} \implies \{t2 \lor t3 <: t1\} $}
   \end{itemize}
-  They can either be set at once for every title type or individually.
-\end{frame}
-
-{
-    \metroset{titleformat frame=smallcaps}
-\begin{frame}{Small caps}
-  This frame uses the \texttt{smallcaps} titleformat.
-
-  \begin{alertblock}{Potential Problems}
-    Be aware, that not every font supports small caps. If for example you typeset your presentation with pdfTeX and the Computer Modern Sans Serif font, every text in smallcaps will be typeset with the Computer Modern Serif font instead.
-  \end{alertblock}
-\end{frame}
-}
-
-{
-\metroset{titleformat frame=allsmallcaps}
-\begin{frame}{All small caps}
-  This frame uses the \texttt{allsmallcaps} titleformat.
-
-  \begin{alertblock}{Potential problems}
-    As this titleformat also uses smallcaps you face the same problems as with the \texttt{smallcaps} titleformat. Additionally this format can cause some other problems. Please refer to the documentation if you consider using it.
-
-    As a rule of thumb: Just use it for plaintext-only titles.
-  \end{alertblock}
-\end{frame}
-}
-
-{
-\metroset{titleformat frame=allcaps}
-\begin{frame}{All caps}
-  This frame uses the \texttt{allcaps} titleformat.
-
-  \begin{alertblock}{Potential Problems}
-    This titleformat is not as problematic as the \texttt{allsmallcaps} format, but basically suffers from the same deficiencies. So please have a look at the documentation if you want to use it.
-  \end{alertblock}
-\end{frame}
-}
-
-
-
-\section{Elements}
-
-\begin{frame}[fragile]{Typography}
-      \begin{verbatim}The theme provides sensible defaults to
-\emph{emphasize} text, \alert{accent} parts
-or show \textbf{bold} results.\end{verbatim}
-
-  \begin{center}becomes\end{center}
-
-  The theme provides sensible defaults to \emph{emphasize} text,
-  \alert{accent} parts or show \textbf{bold} results.
-\end{frame}
-
-\begin{frame}{Font feature test}
-  \begin{itemize}
-    \item Regular
-    \item \textit{Italic}
-    \item \textsc{SmallCaps}
-    \item \textbf{Bold}
-    \item \textbf{\textit{Bold Italic}}
-    \item \textbf{\textsc{Bold SmallCaps}}
-    \item \texttt{Monospace}
-    \item \texttt{\textit{Monospace Italic}}
-    \item \texttt{\textbf{Monospace Bold}}
-    \item \texttt{\textbf{\textit{Monospace Bold Italic}}}
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{Lists}
-  \begin{columns}[T,onlytextwidth]
-    \column{0.33\textwidth}
-      Items
-      \begin{itemize}
-        \item Milk \item Eggs \item Potatos
-      \end{itemize}
-
-    \column{0.33\textwidth}
-      Enumerations
-      \begin{enumerate}
-        \item First, \item Second and \item Last.
-      \end{enumerate}
-
-    \column{0.33\textwidth}
-      Descriptions
-      \begin{description}
-        \item[PowerPoint] Meeh. \item[Beamer] Yeeeha.
-      \end{description}
-  \end{columns}
-\end{frame}
-\begin{frame}{Animation}
-  \begin{itemize}[<+- | alert@+>]
-    \item \alert<4>{This is\only<4>{ really} important}
-    \item Now this
-    \item And now this
-  \end{itemize}
-\end{frame}
-\begin{frame}{Figures}
-  \begin{figure}
-    \newcounter{density}
-    \setcounter{density}{20}
-    \begin{tikzpicture}
-      \def\couleur{alerted text.fg}
-      \path[coordinate] (0,0)  coordinate(A)
-                  ++( 90:5cm) coordinate(B)
-                  ++(0:5cm) coordinate(C)
-                  ++(-90:5cm) coordinate(D);
-      \draw[fill=\couleur!\thedensity] (A) -- (B) -- (C) --(D) -- cycle;
-      \foreach \x in {1,...,40}{%
-          \pgfmathsetcounter{density}{\thedensity+20}
-          \setcounter{density}{\thedensity}
-          \path[coordinate] coordinate(X) at (A){};
-          \path[coordinate] (A) -- (B) coordinate[pos=.10](A)
-                              -- (C) coordinate[pos=.10](B)
-                              -- (D) coordinate[pos=.10](C)
-                              -- (X) coordinate[pos=.10](D);
-          \draw[fill=\couleur!\thedensity] (A)--(B)--(C)-- (D) -- cycle;
-      }
-    \end{tikzpicture}
-    \caption{Rotated square from
-    \href{http://www.texample.net/tikz/examples/rotated-polygons/}{texample.net}.}
-  \end{figure}
-\end{frame}
-\begin{frame}{Tables}
-  \begin{table}
-    \caption{Largest cities in the world (source: Wikipedia)}
-    \begin{tabular}{lr}
-      \toprule
-      City & Population\\
-      \midrule
-      Mexico City & 20,116,842\\
-      Shanghai & 19,210,000\\
-      Peking & 15,796,450\\
-      Istanbul & 14,160,467\\
-      \bottomrule
-    \end{tabular}
-  \end{table}
-\end{frame}
-\begin{frame}{Blocks}
-  Three different block environments are pre-defined and may be styled with an
-  optional background color.
-
-  \begin{columns}[T,onlytextwidth]
-    \column{0.5\textwidth}
-      \begin{block}{Default}
-        Block content.
-      \end{block}
-
-      \begin{alertblock}{Alert}
-        Block content.
-      \end{alertblock}
-
-      \begin{exampleblock}{Example}
-        Block content.
-      \end{exampleblock}
-
-    \column{0.5\textwidth}
-
-      \metroset{block=fill}
-
-      \begin{block}{Default}
-        Block content.
-      \end{block}
-
-      \begin{alertblock}{Alert}
-        Block content.
-      \end{alertblock}
-
-      \begin{exampleblock}{Example}
-        Block content.
-      \end{exampleblock}
-
-  \end{columns}
-\end{frame}
-\begin{frame}{Math}
-  \begin{equation*}
-    e = \lim_{n\to \infty} \left(1 + \frac{1}{n}\right)^n
-  \end{equation*}
-\end{frame}
-\begin{frame}{Line plots}
-  \begin{figure}
-    \begin{tikzpicture}
-      \begin{axis}[
-        mlineplot,
-        width=0.9\textwidth,
-        height=6cm,
-      ]
-
-        \addplot {sin(deg(x))};
-        \addplot+[samples=100] {sin(deg(2*x))};
-
-      \end{axis}
-    \end{tikzpicture}
-  \end{figure}
-\end{frame}
-\begin{frame}{Bar charts}
-  \begin{figure}
-    \begin{tikzpicture}
-      \begin{axis}[
-        mbarplot,
-        xlabel={Foo},
-        ylabel={Bar},
-        width=0.9\textwidth,
-        height=6cm,
-      ]
-
-      \addplot plot coordinates {(1, 20) (2, 25) (3, 22.4) (4, 12.4)};
-      \addplot plot coordinates {(1, 18) (2, 24) (3, 23.5) (4, 13.2)};
-      \addplot plot coordinates {(1, 10) (2, 19) (3, 25) (4, 15.2)};
-
-      \legend{lorem, ipsum, dolor}
-
-      \end{axis}
-    \end{tikzpicture}
-  \end{figure}
-\end{frame}
-\begin{frame}{Quotes}
-  \begin{quote}
-    Veni, Vidi, Vici
-  \end{quote}
-\end{frame}
-
-{%
-\setbeamertemplate{frame footer}{My custom footer}
-\begin{frame}[fragile]{Frame footer}
-    \themename defines a custom beamer template to add a text to the footer. It can be set via
-    \begin{verbatim}\setbeamertemplate{frame footer}{My custom footer}\end{verbatim}
-\end{frame}
-}
-
-\begin{frame}{References}
-  Some references to showcase [allowframebreaks] \cite{knuth92,ConcreteMath,Simpson,Er01,greenwade93}
-\end{frame}
-
-\section{Conclusion}
-
-\begin{frame}{Summary}
-
-  Get the source of this theme and the demo presentation from
-
-  \begin{center}\url{github.com/matze/mtheme}\end{center}
-
-  The theme \emph{itself} is licensed under a
-  \href{http://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons
-  Attribution-ShareAlike 4.0 International License}.
-
-  \begin{center}\ccbysa\end{center}
-
 \end{frame}
 
 {\setbeamercolor{palette primary}{fg=black, bg=yellow}
 \begin{frame}[standout]
-  Questions?
+  
 \end{frame}
 }
 
