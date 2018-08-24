@@ -12,24 +12,139 @@
 \usepackage{xspace}
 \newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
 
-\title{Metropolis}
-\subtitle{A modern beamer theme}
+\usepackage{xcolor}
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\usepackage{listings}
+\lstset{%
+	numberstyle=\tiny,
+	basicstyle=\fontsize{6}{8}\ttfamily,
+	numbersep=15pt,tabsize=4,
+	flexiblecolumns=true,
+	keywordstyle=\color{blue},
+	commentstyle=\color{dkgreen},
+	stringstyle=\color{mauve},
+	numberstyle=\tiny\color{gray},
+	language=Java,
+	breaklines=true,
+	breakatwhitespace=true,
+  showstringspaces=false,
+  aboveskip=0.1em,
+  belowskip=0.5em,
+	morekeywords={*,num,String,var,library,get,set,StringEq,StringHashEq,bool,Top,Bot,<,String@L,String@H,int@L,int@H} ,
+}
+
+
+\title{DESCLASIFICACIÓN BASADA EN TIPOS EN DART}
+\subtitle{IMPLEMENTACIÓN Y ELABORACIÓN DE HERRAMIENTAS DE INFERENCIA}
 % \date{\today}
 \date{}
-\author{Matthias Vogelgesang}
-\institute{Center for modern beamer themes}
-% \titlegraphic{\hfill\includegraphics[height=1.5cm]{logo.pdf}}
+\author{Matías Meneses Cortés}
+%\institute{Departamento de Ciencias de la Computación}
+\titlegraphic{\hfill\includegraphics[height=2.5cm]{logo.png}}
 
 \begin{document}
 
 \maketitle
 
-\begin{frame}{Table of contents}
+\begin{frame}{Contenidos}
   \setbeamertemplate{section in toc}[sections numbered]
   \tableofcontents[hideallsubsections]
 \end{frame}
 
-\section{Introduction}
+\section{Control de flujo de información}
+
+\begin{frame}[fragile]{Protección de confidencialidad}
+  \begin{center}
+    \only<1>{\includegraphics[width=0.8\textwidth]{images/interaccion.png}}
+    \only<2>{\includegraphics[width=0.8\textwidth]{images/interaccion2.png}}
+  \end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Protección de confidencialidad}
+  Distintas técnicas de seguridad en distintas capas de comunicación. \pause
+  \vspace{0.5cm}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.6\textwidth}
+    \includegraphics[width=0.8\textwidth]{images/e2e.png} \pause
+    \column{0.4\textwidth}
+    \includegraphics[width=1.0\textwidth]{images/kernel.png}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{Seguridad basada en el lenguaje}
+  \begin{center}
+    \includegraphics[width=0.4\textwidth]{images/lbs.png}
+  \end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Control de flujo de información}
+  \begin{columns}[T,onlytextwidth]
+    \column{0.3\textwidth}
+    \includegraphics[width=1.0\textwidth]{images/book.png}
+    \column{0.7\textwidth}
+    \vspace{1cm}
+    \begin{onlyenv}<1>
+      \begin{lstlisting}
+        String book(String username, int date, int cardNumber) {
+          return sendToHotel(username, date, cardNumber);
+        }
+
+        String sendToHotel(String username, int date, int cardNumber);
+        String sendToGoogle(String token, int xCoord, int yCoord);
+      \end{lstlisting}
+    \end{onlyenv}
+    \begin{onlyenv}<2>
+      \begin{lstlisting}[escapechar=?]
+        String book(String username, int date, int cardNumber) {
+          return ?\colorbox{yellow!50}{sendToGoogle}?(username, date, cardNumber);
+        }
+
+        String sendToHotel(String username, int date, int cardNumber);
+        String sendToGoogle(String token, int xCoord, int yCoord);
+      \end{lstlisting}
+    \end{onlyenv}
+
+  \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{Tipado de seguridad para el control de flujo de información}
+
+  \begin{columns}[T,onlytextwidth]
+    \column{0.3\textwidth}
+    \includegraphics[width=1.0\textwidth]{images/book.png}
+    \column{0.7\textwidth}
+    \vspace{1cm}
+    \begin{onlyenv}<1>
+      \begin{lstlisting}
+        String@L book(String@L username, int@L date, int@H cardNumber) {
+          return sendToGoogle(username, date, cardNumber);
+        }
+
+        String@L sendToHotel(String@L username, int@L date, int@H cardNumber);
+        String@L sendToGoogle(String@H token, int@L xCoord, int@L yCoord);
+      \end{lstlisting}
+    \end{onlyenv}
+    \begin{onlyenv}<2>
+      \begin{lstlisting}[escapechar=?]
+        String@L book(String@L username, int@L date, int@H cardNumber) {
+          ?\colorbox{red!20}{return sendToGoogle(username, date, cardNumber);}?
+        }
+
+        String@L sendToHotel(String@L username, int@L date, int@H cardNumber);
+        String@L sendToGoogle(String@H token, int@L xCoord, int@L yCoord);
+      \end{lstlisting}
+    \end{onlyenv}
+  \end{columns}
+
+\end{frame}
+
+\begin{frame}[fragile]{No-interferencia}
+  Propiedad fundamental del control de flujo de información.\\
+
+  (ilustración)
+\end{frame}
 
 \begin{frame}[fragile]{Metropolis}
 
