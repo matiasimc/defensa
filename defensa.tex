@@ -141,13 +141,189 @@
 \end{frame}
 
 \begin{frame}[fragile]{No-interferencia}
-  Propiedad fundamental del control de flujo de información.\\
+  Propiedad fundamental del control de flujo de información.
+	\begin{center}
+		\includegraphics[width=0.8\textwidth]{images/noninterference.png}
+	\end{center}
 
-  (ilustración)
+\end{frame}
+
+\begin{frame}[fragile]{Detección de flujos explícitos inválidos}
+	\begin{columns}[T,onlytextwidth]
+		\column{0.33\textwidth}
+		(asignación) \pause
+		\column{0.33\textwidth}
+		(argumento y parámetro) \pause
+		\column{0.33\textwidth}
+		(retorno)
+	\end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{Detección de flujos implícitos inválidos}
+	\begin{columns}[T,onlytextwidth]
+		\column{0.65\textwidth}
+		\begin{onlyenv}<1>
+			(codigo con if)
+		\end{onlyenv}
+		\begin{onlyenv}<2>
+			(codigo con if y marca de pc)
+		\end{onlyenv}
+		\column{0.35\textwidth}
+
+		\only<2>{Contexto de seguridad (\alert{\texttt{pc}}).}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{Problema con no-interferencia}
+	\begin{center}
+		(Código de login) \pause \\
+		\vspace{4cm}
+		\alert{¡\textbf{No} cumple con no-interferencia!}
+	\end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Desclasificación}
+	\begin{center}
+		(Código de login con declassify)
+	\end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Problema con desclasificación}
+	\begin{center}
+		(Código de login con declassify(password)) \pause \\
+		\vspace{4cm}
+		\alert{¡Grave fuga de información!}
+	\end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Desclasificación basada en tipos}
+	\begin{columns}[T,onlytextwidth]
+		\column{0.6\textwidth}
+		(código con tipos de dos facetas)
+		\column{0.4\textwidth}
+		\begin{itemize}
+			\item \texttt{StringEq =} \\ \texttt{[eq: String -> Bool]}
+			\item \texttt{String <: StringEq} \\ (Tipo bien formado)
+			\item No-interferencia relajada
+		\end{itemize}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{Retículo de subtipos}
+	\begin{center}
+		(figura de reticulo)
+	\end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Reglas principales de la desclasificación basada en tipos}
+	\begin{columns}[T,onlytextwidth]
+		\column{0.5\textwidth}
+		(código)
+		\column{0.5\textwidth}
+		\metroset{block=fill}
+		\begin{block}{Métodos autorizados (TmD)}
+			(regla formal)
+		\end{block}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{Reglas principales de la desclasificación basada en tipos}
+	\begin{columns}[T,onlytextwidth]
+		\column{0.5\textwidth}
+		(código)
+		\column{0.5\textwidth}
+		\metroset{block=fill}
+		\begin{block}{Métodos no autorizados (TmH)}
+			(regla formal)
+		\end{block}
+	\end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{Problemas con la desclasificación basada en tipos}
+	\begin{itemize}
+		\item Propuesta sin implementación práctica. \pause
+		\item Anotación completa de facetas para realizar análisis. \pause
+	\end{itemize}
+	\metroset{block=fill}
+	\begin{block}{Objetivo de la memoria}
+		Implementar un sistema de inferencia para la desclasificación basada en tipos, en conjunto con una extensión para ambientes de desarrollo.
+	\end{block}
+\end{frame}
+
+\section{Inferencia de tipos}
+
+\begin{frame}[fragile]{Inferencia de tipos}
+	\begin{onlyenv}<1>
+		(codigo con anotaciones de tipo)
+	\end{onlyenv}
+	\begin{onlyenv}<2>
+		(codigo parcialmente anotado)
+	\end{onlyenv}
+\end{frame}
+
+\begin{frame}[fragile]{Variables de tipo}
+	(codigo anotado con variables de tipo)
+\end{frame}
+
+\begin{frame}[fragile]{Generación de restricciones}
+	\begin{columns}[T,onlytextwidth]
+		\column{0.6\textwidth}
+		(codigo anotado con variables de tipo)
+		\column{0.4\textwidth}
+		(restricciones generadas)
+	\end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{Resolución de restricciones}
+	(Mostrar substituciones hasta resolver)
+\end{frame}
+
+\begin{frame}[fragile]{Restricciones sobre subtipos}
+	\begin{columns}[T,onlytextwidth]
+		\column{0.6\textwidth}
+		(codigo anotado con variables de tipo) \\
+		\only<1>{(retículo de subtipos)}
+		\only<2>{(retículo de subtipos mostrando meet y join)}
+		\column{0.4\textwidth}
+		(restricciones generadas)
+	\end{columns}
+\end{frame}
+
+\section{Inferencia de facetas públicas en Dart}
+
+\begin{frame}[fragile]{Lenguaje Dart}
+	\begin{center}
+		\includegraphics[width=0.75\textwidth]{images/dart.png}
+	\end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Dart Analyzer}
+	\begin{center}
+		\includegraphics[width=1.0\textwidth]{images/ast.png}
+	\end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Analyzer Plugin}
+		\begin{center}
+			\includegraphics[width=1.0\textwidth]{images/plugin.png}
+		\end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Subconjunto soportado de Dart} \pause
+	\begin{center}
+	\begin{lstlisting}[escapechar=!,basicstyle=\fontsize{9}{11}\ttfamily]
+class Foo { !\pause!
+  String foo(String a, String b) { !\pause!
+    String s = "foo"; !\pause!
+    if (a == b)!\pause! return a.concat(b);
+    return s;
+  }
+}
+  \end{lstlisting}
+	\end{center}
 \end{frame}
 
 \begin{frame}[fragile]{Metropolis}
-
   The \themename theme is a Beamer theme with minimal visual noise
   inspired by the \href{https://github.com/hsrmbeamertheme/hsrmbeamertheme}{\textsc{hsrm} Beamer
   Theme} by Benjamin Weiss.
@@ -167,8 +343,6 @@
 
   for which \themename provides a nice progress indicator \ldots
 \end{frame}
-
-\section{Titleformats}
 
 \begin{frame}{Metropolis titleformats}
 	\themename supports 4 different titleformats:
