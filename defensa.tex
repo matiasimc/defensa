@@ -244,10 +244,13 @@
 		\item Propuesta sin implementación práctica. \pause
 		\item Anotación completa de facetas para realizar análisis. \pause
 	\end{itemize}
-	\metroset{block=fill}
-	\begin{block}{Objetivo de la memoria}
-		Implementar un sistema de inferencia para la desclasificación basada en tipos, en conjunto con una extensión para ambientes de desarrollo.
-	\end{block}
+
+	\begin{onlyenv}<3>
+		(código con facetas públicas anotadas)
+	\end{onlyenv}
+	\begin{onlyenv}<4>
+		(código sin facetas públicas anotadas)
+	\end{onlyenv}
 \end{frame}
 
 \section{Inferencia de tipos}
@@ -289,6 +292,13 @@
 	\end{columns}
 \end{frame}
 
+\begin{frame}[fragile]{Objetivo de la memoria}
+	\metroset{block=fill}
+	\begin{block}{Objetivo de la memoria}
+		Implementar un sistema de inferencia de facetas públicas para la desclasificación basada en tipos, en conjunto con una extensión para ambientes de desarrollo.
+	\end{block}
+\end{frame}
+
 \section{Inferencia de facetas públicas en Dart}
 
 \begin{frame}[fragile]{Lenguaje Dart}
@@ -321,6 +331,74 @@ class Foo { !\pause!
 }
   \end{lstlisting}
 	\end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Problema de inferencia a resolver}
+	\metroset{block=fill}
+	\begin{block}{Problema de inferencia}
+		Dado un programa Dart parcialmente tipado con facetas públicas, y completamente tipado con facetas privadas, encontrar la faceta pública de las expresiones no tipadas que más se ajuste al uso de las expresiones, tal que el programa sea bien tipado.
+	\end{block} \pause
+	\begin{onlyenv}<2>
+		(código parcialmente tipado 1)
+	\end{onlyenv}
+	\begin{onlyenv}<3>
+		(código con tipos inferidos 1)
+	\end{onlyenv}
+\end{frame}
+\begin{frame}[fragile]{Problema de inferencia a resolver}
+	\metroset{block=fill}
+	\begin{block}{Problema de inferencia}
+		Dado un programa Dart parcialmente tipado con facetas públicas, y completamente tipado con facetas privadas, encontrar la faceta pública de las expresiones no tipadas que más se ajuste al uso de las expresiones, tal que el programa sea bien tipado.
+	\end{block}
+	\begin{onlyenv}<1>
+		(código parcialmente tipado 2)
+	\end{onlyenv}
+	\begin{onlyenv}<2>
+		(código con tipos inferidos 2)
+	\end{onlyenv}
+\end{frame}
+\begin{frame}[fragile]{Problema de inferencia a resolver}
+	\metroset{block=fill}
+	\begin{block}{Problema de inferencia}
+		Dado un programa Dart parcialmente tipado con facetas públicas, y completamente tipado con facetas privadas, encontrar la faceta pública de las expresiones no tipadas que más se ajuste al uso de las expresiones, tal que el programa sea bien tipado.
+	\end{block}
+	\begin{onlyenv}<1>
+		(código parcialmente tipado 3)
+	\end{onlyenv}
+	\begin{onlyenv}<2>
+		(código con tipos inferidos 3)
+	\end{onlyenv}
+\end{frame}
+
+\begin{frame}[fragile]{Declaración de facetas públicas}
+	Uso de anotaciones de Dart para declarar las facetas públicas. \\ \pause
+
+	(código con \texttt{@S("StringEq")})
+\end{frame}
+
+\begin{frame}[fragile]{Definición de facetas públicas}
+	Uso de clases abstractas de Dart para declarar las facetas públicas. \\ \pause
+
+	(código con \texttt{abstract class StringEq})
+\end{frame}
+
+\begin{frame}[fragile]{Conversión de tipos de Dart a facetas privadas}
+	\begin{onlyenv}<1>
+		(código donde se usan tipos definidos por el usuario y tipos de dart)
+	\end{onlyenv}
+	\begin{onlyenv}<2>
+		(código donde se usan tipos definidos por el usuario y tipos de dart, destacando tipo definido por el usuario)
+	\end{onlyenv}
+	\begin{onlyenv}<3>
+		(código donde se usan tipos definidos por el usuario y tipos de dart, destacando tipo estático común de dart)
+	\end{onlyenv}
+\end{frame}
+
+\begin{frame}[fragile]{Conversión de tipos de Dart a facetas privadas}
+	\only<1->{(Mostrar operación de convert)}\\
+	\only<2>{$P_{Bi}$ (algo)}
+	\only<3>{$P_{Ai}$ (algo)}
+
 \end{frame}
 
 \begin{frame}[fragile]{Metropolis}
