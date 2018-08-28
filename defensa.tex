@@ -2,7 +2,8 @@
 
 \usetheme[progressbar=frametitle]{metropolis}
 \usepackage{appendixnumberbeamer}
-
+\usepackage{tikz}
+\usetikzlibrary{positioning}
 \usepackage{booktabs}
 \usepackage[scale=2]{ccicons}
 
@@ -34,7 +35,7 @@
   showstringspaces=false,
   aboveskip=0.1em,
   belowskip=0.5em,
-	morekeywords={*,num,String,var,library,get,set,StringEq,StringHashEq,bool,Top,Bot,<,String@L,String@H,int@L,int@H} ,
+	morekeywords={*,num,String,var,library,get,set,StringEq,StringHashEq,bool,Top,Bot,<,String@L,String@H,int@L,int@H,bool@H,bool@L} ,
 }
 
 
@@ -75,12 +76,25 @@
   \end{columns}
 \end{frame}
 
-\begin{frame}[fragile]{Seguridad basada en el lenguaje}
+\begin{frame}[fragile]{Seguridad basada en el lenguaje: Tipado de seguridad}
 	\begin{columns}[T,onlytextwidth]
 		\column{0.5\textwidth}
 		\includegraphics[width=0.8\textwidth]{images/lbs.png}
 		\column{0.5\textwidth}
-		(codigo con labels)
+		\begin{lstlisting}[basicstyle=\fontsize{6.3}{8}\ttfamily]
+String@L login(String@L guess, String@H password) {
+  if (password == guess) return "Login successful";
+  else return "Login failed";
+}
+    \end{lstlisting}
+		\begin{center}
+			\begin{tikzpicture}
+				\node(H) 												{\texttt{H}};
+				\node(L)      [below of=H]       {\texttt{L}};
+				\draw(H)      -- (L);
+			\end{tikzpicture} \\
+			Orden parcial de dos niveles
+		\end{center}
 	\end{columns}
 \end{frame}
 
@@ -141,6 +155,16 @@
         String@L sendToGoogle(String@H token, int@L xCoord, int@L yCoord);
       \end{lstlisting}
     \end{onlyenv}
+		\begin{onlyenv}<3>
+      \begin{lstlisting}[escapechar=?]
+        String@L book(String@L username, int@L date, int@H cardNumber) {
+          return sendToHotel(username, date, cardNumber);
+        }
+
+        String@L sendToHotel(String@L username, int@L date, int@H cardNumber);
+        String@L sendToGoogle(String@H token, int@L xCoord, int@L yCoord);
+      \end{lstlisting}
+    \end{onlyenv}
   \end{columns}
 
 \end{frame}
@@ -153,24 +177,57 @@
 \end{frame}
 
 \begin{frame}[fragile]{Detección de flujos explícitos inválidos}
-	\begin{columns}[T,onlytextwidth]
-		\column{0.33\textwidth}
-		(asignación) \pause
-		\column{0.33\textwidth}
-		(argumento y parámetro) \pause
-		\column{0.33\textwidth}
-		(retorno)
-	\end{columns}
+\begin{onlyenv}<1>
+	\begin{center}
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+String@H password = "abc";
+?\colorbox{red!20}{String@L s = password;}?
+\end{lstlisting}
+	\end{center}
+\end{onlyenv}
+
+\begin{onlyenv}<2>
+	\begin{center}
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+tellEveryone(String@L s) {
+  shout(s);
+}
+
+String@H secret = "Me dan miedo las polillas";
+?\colorbox{red!20}{tellEveryone(secret);}?
+\end{lstlisting}
+	\end{center}
+\end{onlyenv}
+
+\begin{onlyenv}<3>
+	\begin{center}
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+String@L tellSecret(String@H secret) {
+  ?\colorbox{red!20}{return secret;}?
+}
+\end{lstlisting}
+	\end{center}
+\end{onlyenv}
 \end{frame}
 
 \begin{frame}[fragile]{Detección de flujos implícitos inválidos}
 	\begin{columns}[T,onlytextwidth]
 		\column{0.65\textwidth}
 		\begin{onlyenv}<1>
-			(codigo con if)
+\begin{lstlisting}[basicstyle=\fontsize{6.5}{8.3}\ttfamily]
+String@L login(String@L guess, String@H password) {
+  if (password == guess) return "Login successful";
+  else return "Login failed";
+}
+\end{lstlisting}
 		\end{onlyenv}
 		\begin{onlyenv}<2>
-			(codigo con if y marca de pc)
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{6.5}{8.3}\ttfamily]
+String@L login(String@L guess, String@H password) {
+  if ?\colorbox{orange!20}{(password == guess)}? ?\colorbox{red!20}{return "Login successful";}?
+  else ?\colorbox{red!20}{return "Login failed";}?
+}
+\end{lstlisting}
 		\end{onlyenv}
 		\column{0.35\textwidth}
 
@@ -180,67 +237,87 @@
 
 \begin{frame}[fragile]{Problema con no-interferencia}
 	\begin{center}
-		(Código de login) \pause \\
-		\vspace{4cm}
+\begin{lstlisting}[basicstyle=\fontsize{9}{9}\ttfamily]
+            String@L login(String@L guess, String@H password) {
+              if (password == guess) return "Login successful";
+              else return "Login failed";
+            }
+\end{lstlisting}
+		\vspace{3cm}
 		\alert{¡\textbf{No} cumple con no-interferencia!}
 	\end{center}
 \end{frame}
 
 \begin{frame}[fragile]{Desclasificación}
 	\begin{center}
-		(Código de login con declassify)
+\begin{lstlisting}[basicstyle=\fontsize{9}{9}\ttfamily]
+            String@L login(String@L guess, String@H password) {
+              if (declassify(password == guess)) return "Login successful";
+              else return "Login failed";
+            }
+\end{lstlisting}
 	\end{center}
 \end{frame}
 
 \begin{frame}[fragile]{Problema con desclasificación}
 	\begin{center}
-		(Código de login con declassify(password)) \pause \\
-		\vspace{4cm}
+\begin{lstlisting}[basicstyle=\fontsize{9}{9}\ttfamily]
+                                    declassify(password)
+\end{lstlisting} \pause
+		\vspace{3cm}
 		\alert{¡Grave fuga de información!}
 	\end{center}
 \end{frame}
 
 \begin{frame}[fragile]{Desclasificación basada en tipos}
-	\begin{columns}[T,onlytextwidth]
-		\column{0.6\textwidth}
-		(código con tipos de dos facetas)
-		\column{0.4\textwidth}
-		\begin{itemize}
-			\item \texttt{StringEq =} \\ \texttt{[eq: String -> Bool]}
-			\item \texttt{String <: StringEq} \\ (Tipo bien formado)
-			\item No-interferencia relajada
-		\end{itemize}
-	\end{columns}
+\begin{lstlisting}[basicstyle=\fontsize{9}{9}\ttfamily]
+String<String login(String<String guess, String<StringEq password) {
+  if (password.eq(guess)) return "Login successful";
+  else return "Login failed";
+}
+\end{lstlisting}
+
+\begin{itemize}
+	\item \texttt{StringEq = [eq: String -> Bool]}
+	\item \texttt{String <: StringEq} (Tipo bien formado)
+	\item No-interferencia relajada
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}[fragile]{Retículo de subtipos}
 	\begin{center}
-		(figura de reticulo)
+		\begin{tikzpicture}[node distance=2.1cm]
+			\node(Top) 												{\texttt{Top} $\triangleq [\ ]$};
+			\node(StringEq)		[below right=0.7cm and 0.1cm of Top]			{\texttt{StringEq} $\triangleq [\mathtt{eq} : \mathtt{String} \rightarrow \mathtt{Bool}]$};
+			\node(StringEqLength)      [below of=StringEq]       {\texttt{StringEqLength}};
+			\node(String)				[below of=StringEqLength]       {\texttt{String} $\triangleq [\mathtt{eq} : \mathtt{String} \rightarrow \mathtt{Bool}, \mathtt{length} : \mathtt{Unit} \rightarrow \mathtt{Int},\ ...]$};
+			\node(int)					[below left=0.7cm and 0.1cm of Top] 			{\texttt{Int} $\triangleq [\mathtt{abs} : \mathtt{Unit} \rightarrow \mathtt{Int},\ ...]$};
+			\draw(Top)      -- (StringEq);
+			\draw(Top)      -- (int);
+			\draw(StringEq)      -- (StringEqLength);
+			\draw(StringEqLength)      -- (String);
+		\end{tikzpicture}
 	\end{center}
 \end{frame}
 
-\begin{frame}[fragile]{Reglas principales de la desclasificación basada en tipos}
-	\begin{columns}[T,onlytextwidth]
-		\column{0.5\textwidth}
-		(código)
-		\column{0.5\textwidth}
-		\metroset{block=fill}
-		\begin{block}{Métodos autorizados (TmD)}
-			(regla formal)
-		\end{block}
-	\end{columns}
-\end{frame}
-
-\begin{frame}[fragile]{Reglas principales de la desclasificación basada en tipos}
-	\begin{columns}[T,onlytextwidth]
-		\column{0.5\textwidth}
-		(código)
-		\column{0.5\textwidth}
-		\metroset{block=fill}
-		\begin{block}{Métodos no autorizados (TmH)}
-			(regla formal)
-		\end{block}
-	\end{columns}
+\begin{frame}[fragile]{Regla principal de la desclasificación basada en tipos}
+\begin{onlyenv}<1>
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+String<String login(String<String guess, String<?\colorbox{orange!20}{Top}? password) {
+  if (?\colorbox{orange!20}{password.eq(guess)}?) return "Login successful";
+  else return "Login failed";
+}
+\end{lstlisting}
+\end{onlyenv}
+\begin{onlyenv}<2>
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+String<String login(String<String guess, String<?\colorbox{orange!20}{Top}? password) {
+  if (?\colorbox{orange!20}{password.eq(guess)}?) ?\colorbox{red!20}{return "Login successful";}?
+  else ?\colorbox{red!20}{return "Login failed";}?
+}
+\end{lstlisting}
+\end{onlyenv}
 \end{frame}
 
 \begin{frame}[fragile]{Problemas con la desclasificación basada en tipos}
@@ -319,7 +396,7 @@
 
 \begin{frame}[fragile]{Analyzer Plugin}
 		\begin{center}
-			\includegraphics[width=1.0\textwidth]{images/plugin.png}
+      \includegraphics[width=1.0\textwidth]{images/plugin.png}
 		\end{center}
 \end{frame}
 
@@ -660,9 +737,9 @@ class Foo { !\pause!
 	\begin{table}
 		\caption{Anotación de facetas públicas en identificadores}
 		\begin{tabular}{c|c}
-			Con inferencia & Sin inferencia\\
-			\hline
-			7 & 22\\
+      Con inferencia & Sin inferencia\\
+      \hline
+      7 & 22\\
 		\end{tabular}
 	\end{table}
 \end{frame}
