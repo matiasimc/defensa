@@ -176,65 +176,6 @@ String@L login(String@L guess, String@H password) {
 	\end{center}
 \end{frame}
 
-\begin{frame}[fragile]{Detección de flujos explícitos inválidos}
-\begin{onlyenv}<1>
-	\begin{center}
-\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
-String@H password = "abc";
-?\colorbox{red!20}{String@L s = password;}?
-\end{lstlisting}
-	\end{center}
-\end{onlyenv}
-
-\begin{onlyenv}<2>
-	\begin{center}
-\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
-tellEveryone(String@L s) {
-  shout(s);
-}
-
-String@H secret = "Me dan miedo las polillas";
-?\colorbox{red!20}{tellEveryone(secret);}?
-\end{lstlisting}
-	\end{center}
-\end{onlyenv}
-
-\begin{onlyenv}<3>
-	\begin{center}
-\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
-String@L tellSecret(String@H secret) {
-  ?\colorbox{red!20}{return secret;}?
-}
-\end{lstlisting}
-	\end{center}
-\end{onlyenv}
-\end{frame}
-
-\begin{frame}[fragile]{Detección de flujos implícitos inválidos}
-	\begin{columns}[T,onlytextwidth]
-		\column{0.65\textwidth}
-		\begin{onlyenv}<1>
-\begin{lstlisting}[basicstyle=\fontsize{6.5}{8.3}\ttfamily]
-String@L login(String@L guess, String@H password) {
-  if (password == guess) return "Login successful";
-  else return "Login failed";
-}
-\end{lstlisting}
-		\end{onlyenv}
-		\begin{onlyenv}<2>
-\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{6.5}{8.3}\ttfamily]
-String@L login(String@L guess, String@H password) {
-  if ?\colorbox{orange!20}{(password == guess)}? ?\colorbox{red!20}{return "Login successful";}?
-  else ?\colorbox{red!20}{return "Login failed";}?
-}
-\end{lstlisting}
-		\end{onlyenv}
-		\column{0.35\textwidth}
-
-		\only<2>{Contexto de seguridad (\alert{\texttt{pc}}).}
-	\end{columns}
-\end{frame}
-
 \begin{frame}[fragile]{Problema con no-interferencia}
 	\begin{center}
 \begin{lstlisting}[basicstyle=\fontsize{9}{9}\ttfamily]
@@ -278,9 +219,10 @@ String<String login(String<String guess, String<StringEq password) {
 \end{lstlisting}
 
 \begin{itemize}
-	\item \texttt{StringEq = [eq: String -> Bool]}
-	\item \texttt{String <: StringEq} (Tipo bien formado)
-	\item No-interferencia relajada
+	\item Tipos de dos facetas \texttt{String<StringEq} \pause
+	\item \texttt{StringEq = [eq: String<String -> Bool<Bool]} \pause
+	\item \texttt{String <: StringEq} (Tipo bien formado) \pause
+	\item No-interferencia relajada 
 \end{itemize}
 
 \end{frame}
@@ -290,9 +232,9 @@ String<String login(String<String guess, String<StringEq password) {
 		\begin{tikzpicture}[node distance=2.1cm]
 			\node(Top) 												{\texttt{Top} $\triangleq [\ ]$};
 			\node(StringEq)		[below right=0.7cm and 0.1cm of Top]			{\texttt{StringEq} $\triangleq [\mathtt{eq} : \mathtt{String} \rightarrow \mathtt{Bool}]$};
-			\node(StringEqLength)      [below of=StringEq]       {\texttt{StringEqLength}};
-			\node(String)				[below of=StringEqLength]       {\texttt{String} $\triangleq [\mathtt{eq} : \mathtt{String} \rightarrow \mathtt{Bool}, \mathtt{length} : \mathtt{Unit} \rightarrow \mathtt{Int},\ ...]$};
-			\node(int)					[below left=0.7cm and 0.1cm of Top] 			{\texttt{Int} $\triangleq [\mathtt{abs} : \mathtt{Unit} \rightarrow \mathtt{Int},\ ...]$};
+			\node(StringEqLength)      [below of=StringEq]       {\texttt{StringEqLength} $\triangleq [...,\ \mathtt{length: Unit\rightarrow Int]}$};
+			\node(String)				[below of=StringEqLength]       {\texttt{String (Bot)} $\triangleq [...]$};
+			\node(int)					[below left=0.7cm and 0.1cm of Top] 			{\texttt{Int (Bot)} $\triangleq [\mathtt{abs} : \mathtt{Unit} \rightarrow \mathtt{Int},\ ...]$};
 			\draw(Top)      -- (StringEq);
 			\draw(Top)      -- (int);
 			\draw(StringEq)      -- (StringEqLength);
@@ -325,28 +267,45 @@ String<String login(String<String guess, String<?\colorbox{orange!20}{Top}? pass
 		\item Propuesta sin implementación práctica. \pause
 		\item Anotación completa de facetas para realizar análisis. \pause
 	\end{itemize}
-
+	\vspace{1cm}
 	\begin{onlyenv}<3>
-		(código con facetas públicas anotadas)
+\begin{lstlisting}[basicstyle=\fontsize{9}{9}\ttfamily]
+String<String login(String<String guess, String<StringEq password) {
+  if (password.eq(guess)) return "Login successful";
+  else return "Login failed";
+}
+\end{lstlisting}
+
 	\end{onlyenv}
 	\begin{onlyenv}<4>
-		(código sin facetas públicas anotadas)
+\begin{lstlisting}[basicstyle=\fontsize{9}{9}\ttfamily]
+String login(String guess, String<StringEq password) {
+  if (password.eq(guess)) return "Login successful";
+  else return "Login failed";
+}
+\end{lstlisting}
+
 	\end{onlyenv}
 \end{frame}
 
 \section{Inferencia de tipos}
 
 \begin{frame}[fragile]{Inferencia de tipos}
-	\begin{onlyenv}<1>
-		(codigo con anotaciones de tipo)
-	\end{onlyenv}
-	\begin{onlyenv}<2>
-		(codigo parcialmente anotado)
-	\end{onlyenv}
+\begin{lstlisting}[basicstyle=\fontsize{9}{9}\ttfamily]
+calculate(c, n) {
+  if (c) return n*2;
+  else return n*0.5;
+}
+\end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]{Variables de tipo}
-	(codigo anotado con variables de tipo)
+\begin{lstlisting}[basicstyle=\fontsize{9}{9}\ttfamily]
+X calculate(Y c, Z n) {
+  if (c) return n*2;
+  else return n*0.5;
+}
+\end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]{Generación de restricciones}
