@@ -22,7 +22,7 @@
 \usepackage{listings}
 \lstset{%
 	numberstyle=\tiny,
-	basicstyle=\fontsize{6}{8}\ttfamily,
+	basicstyle=\fontsize{6.5}{8.3}\ttfamily,
 	numbersep=15pt,tabsize=4,
 	flexiblecolumns=true,
 	keywordstyle=\color{blue},
@@ -61,7 +61,10 @@
 \begin{frame}[fragile]{Protección de confidencialidad}
   \begin{center}
     \only<1>{\includegraphics[width=0.8\textwidth]{images/interaccion.png}}
-    \only<2>{\includegraphics[width=0.8\textwidth]{images/interaccion2.png}}
+		\only<2>{\includegraphics[width=0.8\textwidth]{images/auth.png}}
+		\only<3>{\includegraphics[width=0.8\textwidth]{images/gdrive.png}}
+		\only<4>{\includegraphics[width=0.8\textwidth]{images/pay.png}}
+    \only<5>{\includegraphics[width=0.8\textwidth]{images/interaccion2.png}}
   \end{center}
 \end{frame}
 
@@ -100,9 +103,9 @@ String@L login(String@L guess, String@H password) {
 
 \begin{frame}[fragile]{Control de flujo de información}
   \begin{columns}[T,onlytextwidth]
-    \column{0.3\textwidth}
+    \column{0.25\textwidth}
     \includegraphics[width=1.0\textwidth]{images/book.png}
-    \column{0.7\textwidth}
+    \column{0.75\textwidth}
     \vspace{1cm}
     \begin{onlyenv}<1>
       \begin{lstlisting}
@@ -131,9 +134,9 @@ String@L login(String@L guess, String@H password) {
 \begin{frame}[fragile]{Tipado de seguridad para el control de flujo de información}
 
   \begin{columns}[T,onlytextwidth]
-    \column{0.3\textwidth}
+    \column{0.25\textwidth}
     \includegraphics[width=1.0\textwidth]{images/book.png}
-    \column{0.7\textwidth}
+    \column{0.75\textwidth}
     \vspace{1cm}
     \begin{onlyenv}<1>
       \begin{lstlisting}
@@ -233,8 +236,8 @@ String<String login(String<String guess, String<StringEq password) {
 			\node(Top) 												{\texttt{Top} $\triangleq [\ ]$};
 			\node(StringEq)		[below right=0.7cm and 0.1cm of Top]			{\texttt{StringEq} $\triangleq [\mathtt{eq} : \mathtt{String} \rightarrow \mathtt{Bool}]$};
 			\node(StringEqLength)      [below of=StringEq]       {\texttt{StringEqLength} $\triangleq [...,\ \mathtt{length: Unit\rightarrow Int]}$};
-			\node(String)				[below of=StringEqLength]       {\texttt{String (Bot)} $\triangleq [...]$};
-			\node(int)					[below left=0.7cm and 0.1cm of Top] 			{\texttt{Int (Bot)} $\triangleq [\mathtt{abs} : \mathtt{Unit} \rightarrow \mathtt{Int},\ ...]$};
+			\node(String)				[below of=StringEqLength]       {\texttt{String} $\triangleq [...]$};
+			\node(int)					[below left=0.7cm and 0.1cm of Top] 			{\texttt{Int} $\triangleq [\mathtt{abs} : \mathtt{Unit} \rightarrow \mathtt{Int},\ ...]$};
 			\draw(Top)      -- (StringEq);
 			\draw(Top)      -- (int);
 			\draw(StringEq)      -- (StringEqLength);
@@ -290,75 +293,114 @@ String login(String guess, String<StringEq password) {
 
 \section{Inferencia de tipos}
 
-\begin{frame}[fragile]{Inferencia de tipos}
-
+\begin{frame}[fragile]{Inferencia de tipos en Scala}
 	\begin{columns}[T,onlytextwidth]
 		\column{0.6\textwidth}
-\begin{lstlisting}[basicstyle=\fontsize{9}{9}\ttfamily]
-calculate(c, Int n) {
-  if (c) return n*2;
-  else return n*0.5;
+\begin{lstlisting}[language=Scala,basicstyle=\fontsize{9}{9}\ttfamily]
+def mathFunction(n1: Int, n2: Float) = {
+  val n = fact(n1);
+  n + n2;
+}
+
+def fact(n: Int) : Int = {
+  if (n == 0) return 1
+  else n * fact(n-1)
 }
 \end{lstlisting} \pause
 		\column{0.4\textwidth}
-		\begin{tikzpicture}[node distance=1.5cm]
-	    \node(Top) {\texttt{Top}};
-	    \node(num) [below right of=Top]												{\texttt{Num}};
-	    \node(int)		[below right of=num]			{\texttt{Int}};
-	    \node(float)					[below left of=num] 			{\texttt{Float}};
-	    \node(bool) [below left of=Top] {\texttt{Bool}};
-	    \draw (Top) -- (num);
-	    \draw (Top) -- (bool);
-	    \draw (num)      -- (int);
-	    \draw (num)      -- (float);
-	  \end{tikzpicture}
+		\begin{itemize}
+			\item Inferencia de tipos local \pause
+			\item Soporte de overloading y conversiones implícitas de tipos
+		\end{itemize}
 	\end{columns}
 \end{frame}
 
-\begin{frame}[fragile]{Variables de tipo}
+\begin{frame}[fragile]{Inferencia de tipos en OCaml}
 	\begin{columns}[T,onlytextwidth]
 		\column{0.6\textwidth}
-\begin{lstlisting}[basicstyle=\fontsize{9}{9}\ttfamily]
-X calculate(Y c, Int n) {
-  if (c) return n*2;
-  else return n*0.5;
-}
-\end{lstlisting}
-\end{columns}
-\end{frame}
+\begin{lstlisting}[language=ML,basicstyle=\fontsize{9}{9}\ttfamily]
+# let average a b =
+    (a +. b) /. 2.0;;
 
-\begin{frame}[fragile]{Generación de restricciones}
-	\begin{columns}[T,onlytextwidth]
-		\column{0.6\textwidth}
-\begin{lstlisting}[basicstyle=\fontsize{9}{9}\ttfamily]
-X calculate(Y c, Int n) {
-  if (c) return n*2;
-  else return n*0.5;
-}
-\end{lstlisting}
-		\column{0.4\textwidth}
-		\begin{enumerate} \pause
-			\item \texttt{Y <: Bool} \pause
-			\item \texttt{Int <: X} \pause
-			\item \texttt{Float <: X}
-		\end{enumerate}
+val average : float -> float -> float
+\end{lstlisting} \pause
+\column{0.4\textwidth}
+\begin{itemize}
+	\item Inferencia de tipos global \pause
+	\item No soporta overloading y conversiones implícitas
+\end{itemize}
 	\end{columns}
 \end{frame}
-
-\begin{frame}[fragile]{Resolución de restricciones}
-	(Mostrar substituciones hasta resolver)
-\end{frame}
-
-\begin{frame}[fragile]{Restricciones sobre subtipos}
-	\begin{columns}[T,onlytextwidth]
-		\column{0.6\textwidth}
-		(codigo anotado con variables de tipo) \\
-		\only<1>{(retículo de subtipos)}
-		\only<2>{(retículo de subtipos mostrando meet y join)}
-		\column{0.4\textwidth}
-		(restricciones generadas)
-	\end{columns}
-\end{frame}
+%
+% \begin{frame}[fragile]{Inferencia de tipos}
+%
+% 	\begin{columns}[T,onlytextwidth]
+% 		\column{0.6\textwidth}
+% \begin{lstlisting}[basicstyle=\fontsize{9}{9}\ttfamily]
+% calculate(c, Int n) {
+%   if (c) return n*2;
+%   else return n*0.5;
+% }
+% \end{lstlisting} \pause
+% 		\column{0.4\textwidth}
+% 		\begin{tikzpicture}[node distance=1.5cm]
+% 	    \node(Top) {\texttt{Top}};
+% 	    \node(num) [below right of=Top]												{\texttt{Num}};
+% 	    \node(int)		[below right of=num]			{\texttt{Int}};
+% 	    \node(float)					[below left of=num] 			{\texttt{Float}};
+% 	    \node(bool) [below left of=Top] {\texttt{Bool}};
+% 	    \draw (Top) -- (num);
+% 	    \draw (Top) -- (bool);
+% 	    \draw (num)      -- (int);
+% 	    \draw (num)      -- (float);
+% 	  \end{tikzpicture}
+% 	\end{columns}
+% \end{frame}
+%
+% \begin{frame}[fragile]{Variables de tipo}
+% 	\begin{columns}[T,onlytextwidth]
+% 		\column{0.6\textwidth}
+% \begin{lstlisting}[basicstyle=\fontsize{9}{9}\ttfamily]
+% X calculate(Y c, Int n) {
+%   if (c) return n*2;
+%   else return n*0.5;
+% }
+% \end{lstlisting}
+% \end{columns}
+% \end{frame}
+%
+% \begin{frame}[fragile]{Generación de restricciones}
+% 	\begin{columns}[T,onlytextwidth]
+% 		\column{0.6\textwidth}
+% \begin{lstlisting}[basicstyle=\fontsize{9}{9}\ttfamily]
+% X calculate(Y c, Int n) {
+%   if (c) return n*2;
+%   else return n*0.5;
+% }
+% \end{lstlisting}
+% 		\column{0.4\textwidth}
+% 		\begin{enumerate} \pause
+% 			\item \texttt{Y <: Bool} \pause
+% 			\item \texttt{Int <: X} \pause
+% 			\item \texttt{Float <: X}
+% 		\end{enumerate}
+% 	\end{columns}
+% \end{frame}
+%
+% \begin{frame}[fragile]{Resolución de restricciones}
+% 	(Mostrar substituciones hasta resolver)
+% \end{frame}
+%
+% \begin{frame}[fragile]{Restricciones sobre subtipos}
+% 	\begin{columns}[T,onlytextwidth]
+% 		\column{0.6\textwidth}
+% 		(codigo anotado con variables de tipo) \\
+% 		\only<1>{(retículo de subtipos)}
+% 		\only<2>{(retículo de subtipos mostrando meet y join)}
+% 		\column{0.4\textwidth}
+% 		(restricciones generadas)
+% 	\end{columns}
+% \end{frame}
 
 \begin{frame}[fragile]{Objetivo de la memoria}
 	\metroset{block=fill}
@@ -368,6 +410,91 @@ X calculate(Y c, Int n) {
 \end{frame}
 
 \section{Inferencia de facetas públicas en Dart}
+
+\begin{frame}[fragile]{Problema de inferencia a resolver}
+	Ejemplo 1 \\
+	\vspace{1cm}
+	\begin{onlyenv}<1>
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+bool login(String guess, String password) {
+  return password.eq(guess);
+}
+\end{lstlisting}
+	\end{onlyenv}
+	\begin{onlyenv}<2>
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+bool login(String guess, String<?\alert{StringEq}? password) {
+  return password.eq(guess);
+}
+
+?\alert{StringEq}? = [eq: String<String -> bool<bool]
+\end{lstlisting}
+	\end{onlyenv}
+\begin{onlyenv}<3>
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+bool login(String<?\alert{String}? guess, String<StringEq password) {
+  return password.eq(guess);
+}
+\end{lstlisting}
+	\end{onlyenv}
+	\begin{onlyenv}<4>
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+bool<?\alert{bool}? login(String<String guess, String<StringEq password) {
+  return password.eq(guess);
+}
+\end{lstlisting}
+	\end{onlyenv}
+\end{frame}
+
+\begin{frame}[fragile]{Problema de inferencia a resolver}
+	Ejemplo 2 \\
+	\vspace{1cm}
+	\begin{onlyenv}<1>
+\begin{lstlisting}[basicstyle=\fontsize{9}{9}\ttfamily]
+bool login(String<String guess, String<Top password) {
+  return password.eq(guess);
+}
+\end{lstlisting}
+	\end{onlyenv}
+	\begin{onlyenv}<2>
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+bool<?\alert{Top}? login(String<String guess, String<Top password) {
+  return password.eq(guess);
+}
+\end{lstlisting}
+	\end{onlyenv}
+\end{frame}
+
+\begin{frame}[fragile]{Problema de inferencia a resolver}
+	Ejemplo 3 \\
+	\vspace{1cm}
+	\begin{onlyenv}<1>
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+bool<bool login(int<int guess, String password) {
+  return password.hash().eq(guess);
+}
+\end{lstlisting}
+	\end{onlyenv}
+	\begin{onlyenv}<2>
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+bool<bool login(String<String guess, String<?\alert{StringHash}? password) {
+  return password.hash().eq(guess);
+}
+
+?\alert{StringHash}? = [hash: () -> int< -]
+\end{lstlisting}
+	\end{onlyenv}
+	\begin{onlyenv}<3>
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+bool<bool login(String<String guess, String<?\alert{StringHash}? password) {
+  return password.hash().eq(guess);
+}
+
+?\alert{StringHash}? = [hash: () -> int<?\alert{IntEq}?]
+?\alert{IntEq}? = [eq: int<int -> bool<bool]
+\end{lstlisting}
+	\end{onlyenv}
+\end{frame}
 
 \begin{frame}[fragile]{Lenguaje Dart}
 	\begin{center}
@@ -387,67 +514,6 @@ X calculate(Y c, Int n) {
 		\end{center}
 \end{frame}
 
-\begin{frame}[fragile]{Problema de inferencia a resolver}
-	\metroset{block=fill}
-	\begin{block}{Problema de inferencia}
-		Dado un programa Dart parcialmente tipado con facetas públicas, y completamente tipado con facetas privadas, encontrar la faceta pública de las expresiones no tipadas que más se ajuste al uso de las expresiones, tal que el programa sea bien tipado.
-	\end{block} \pause
-	\begin{onlyenv}<2>
-		(código parcialmente tipado 1)
-	\end{onlyenv}
-	\begin{onlyenv}<3>
-		(código con tipos inferidos 1)
-	\end{onlyenv}
-\end{frame}
-\begin{frame}[fragile]{Problema de inferencia a resolver}
-	\metroset{block=fill}
-	\begin{block}{Problema de inferencia}
-		Dado un programa Dart parcialmente tipado con facetas públicas, y completamente tipado con facetas privadas, encontrar la faceta pública de las expresiones no tipadas que más se ajuste al uso de las expresiones, tal que el programa sea bien tipado.
-	\end{block}
-	\begin{onlyenv}<1>
-		(código parcialmente tipado 2)
-	\end{onlyenv}
-	\begin{onlyenv}<2>
-		(código con tipos inferidos 2)
-	\end{onlyenv}
-\end{frame}
-\begin{frame}[fragile]{Problema de inferencia a resolver}
-	\metroset{block=fill}
-	\begin{block}{Problema de inferencia}
-		Dado un programa Dart parcialmente tipado con facetas públicas, y completamente tipado con facetas privadas, encontrar la faceta pública de las expresiones no tipadas que más se ajuste al uso de las expresiones, tal que el programa sea bien tipado.
-	\end{block}
-	\begin{onlyenv}<1>
-		(código parcialmente tipado 3)
-	\end{onlyenv}
-	\begin{onlyenv}<2>
-		(código con tipos inferidos 3)
-	\end{onlyenv}
-\end{frame}
-
-\begin{frame}[fragile]{Pasos de la solución}
-	\begin{enumerate}
-		\item Definición del subconjunto de Dart soportado.
-		\item Definición y declaración de facetas públicas en Dart.
-		\item Integración de tipos estáticos comunes de Dart con las facetas de la desclasificación basada en tipos.
-		\item Definición de la gramática de tipos.
-		\item Descripción del paso de generación de restricciones para un programa Dart.
-		\item Descripción del paso de resolución de restricciones.
-		\item Implementación de la extensión para ambientes de desarrollo.
-	\end{enumerate}
-\end{frame}
-
-\begin{frame}[fragile]{Pasos de la solución}
-	\begin{enumerate}
-		\alert{\item Definición del subconjunto de Dart soportado.}
-		\item Definición y declaración de facetas públicas en Dart.
-		\item Integración de tipos estáticos comunes de Dart con las facetas de la desclasificación basada en tipos.
-		\item Definición de la gramática de tipos.
-		\item Descripción del paso de generación de restricciones para un programa Dart.
-		\item Descripción del paso de resolución de restricciones.
-		\item Implementación de la extensión para ambientes de desarrollo.
-	\end{enumerate}
-\end{frame}
-
 \begin{frame}[fragile]{Subconjunto soportado de Dart}
 	\begin{center}
 	\begin{lstlisting}[escapechar=!,basicstyle=\fontsize{9}{11}\ttfamily]
@@ -462,187 +528,187 @@ class Foo { !\pause!
 	\end{center}
 \end{frame}
 
-\begin{frame}[fragile]{Pasos de la solución}
-	\begin{enumerate}
-		\item Definición del subconjunto de Dart soportado.
-		\alert{\item Definición y declaración de facetas públicas en Dart.}
-		\item Integración de tipos estáticos comunes de Dart con las facetas de la desclasificación basada en tipos.
-		\item Definición de la gramática de tipos.
-		\item Descripción del paso de generación de restricciones para un programa Dart.
-		\item Descripción del paso de resolución de restricciones.
-		\item Implementación de la extensión para ambientes de desarrollo.
-	\end{enumerate}
-\end{frame}
-
 \begin{frame}[fragile]{Declaración de facetas públicas}
 	Uso de anotaciones de Dart para declarar las facetas públicas. \\ \pause
-
-	(código con \texttt{@S("StringEq")})
+	\vspace{1cm}
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+bool login(String guess, @S("StringEq") String password) {
+  return password.eq(guess);
+}
+\end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]{Definición de facetas públicas}
 	Uso de clases abstractas de Dart para declarar las facetas públicas. \\ \pause
+	\vspace{1cm}
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+bool login(String guess, @S("StringEq") String password) {
+  return password.eq(guess);
+}
 
-	(código con \texttt{abstract class StringEq})
+abstract class StringEq {
+  bool eq(String other);
+}
+\end{lstlisting}
 \end{frame}
-
-\begin{frame}[fragile]{Pasos de la solución}
-	\begin{enumerate}
-		\item Definición del subconjunto de Dart soportado.
-		\item Definición y declaración de facetas públicas en Dart.
-		\alert{\item Integración de tipos estáticos comunes de Dart con las facetas de la desclasificación basada en tipos.}
-		\item Definición de la gramática de tipos.
-		\item Descripción del paso de generación de restricciones para un programa Dart.
-		\item Descripción del paso de resolución de restricciones.
-		\item Implementación de la extensión para ambientes de desarrollo.
-	\end{enumerate}
-\end{frame}
-
-\begin{frame}[fragile]{Conversión de tipos de Dart a facetas privadas}
-	\begin{onlyenv}<1>
-		(código donde se usan tipos definidos por el usuario y tipos de dart)
-	\end{onlyenv}
-	\begin{onlyenv}<2>
-		(código donde se usan tipos definidos por el usuario y tipos de dart, destacando tipo definido por el usuario)
-	\end{onlyenv}
-	\begin{onlyenv}<3>
-		(código donde se usan tipos definidos por el usuario y tipos de dart, destacando tipo estático común de dart)
-	\end{onlyenv}
-\end{frame}
-
-\begin{frame}[fragile]{Conversión de tipos de Dart a facetas privadas}
-	\only<1->{(Mostrar operación de convert)}\\
-	\only<2>{$P_{Bi}$ (algo)}
-	\only<3>{$P_{Ai}$ (algo)}
-
-\end{frame}
-
-\begin{frame}[fragile]{Pasos de la solución}
-	\begin{enumerate}
-		\item Definición del subconjunto de Dart soportado.
-		\item Definición y declaración de facetas públicas en Dart.
-		\item Integración de tipos estáticos comunes de Dart con las facetas de la desclasificación basada en tipos.
-		\alert{\item Definición de la gramática de tipos.}
-		\item Descripción del paso de generación de restricciones para un programa Dart.
-		\item Descripción del paso de resolución de restricciones.
-		\item Implementación de la extensión para ambientes de desarrollo.
-	\end{enumerate}
-\end{frame}
-
-\begin{frame}[fragile]{Gramática de tipos}
-	\metroset{block=fill}
-	\begin{block}{Gramática de tipos}
-		\[\mathtt{\tau := \alpha\ |\ Obj(\overline{l: \tau})\ |\ \overline{\tau} \rightarrow \tau \ |\ \tau \sqcap \tau\ |\ \tau \sqcup \tau\ |\ Bot\ |\ Top}\]
-	\end{block}
-\end{frame}
-
-\begin{frame}[fragile]{Pasos de la solución}
-	\begin{enumerate}
-		\item Definición del subconjunto de Dart soportado.
-		\item Definición y declaración de facetas públicas en Dart.
-		\item Integración de tipos estáticos comunes de Dart con las facetas de la desclasificación basada en tipos.
-		\item Definición de la gramática de tipos.
-		\alert{\item Descripción del paso de generación de restricciones para un programa Dart.}
-		\item Descripción del paso de resolución de restricciones.
-		\item Implementación de la extensión para ambientes de desarrollo.
-	\end{enumerate}
-\end{frame}
-
-\begin{frame}[fragile]{Generación de restricciones}
-	\begin{columns}[T,onlytextwidth]
-		\column{0.6\textwidth}
-		(Código con invocación a método y variables de tipo)
-		\column{0.4\textwidth}
-		(restricciones generadas)
-	\end{columns}
-\end{frame}
-
-\begin{frame}[fragile]{Generación de restricciones}
-	\begin{columns}[T,onlytextwidth]
-		\column{0.6\textwidth}
-		(Código con expresión de retorno y variables de tipo)
-		\column{0.4\textwidth}
-		(restricciones generadas)
-	\end{columns}
-\end{frame}
-
-\begin{frame}[fragile]{Generación de restricciones}
-	\begin{columns}[T,onlytextwidth]
-		\column{0.6\textwidth}
-		(Código con expresión de asignación y variables de tipo)
-		\column{0.4\textwidth}
-		(restricciones generadas)
-	\end{columns}
-\end{frame}
-
-\begin{frame}[fragile]{Pasos de la solución}
-	\begin{enumerate}
-		\item Definición del subconjunto de Dart soportado.
-		\item Definición y declaración de facetas públicas en Dart.
-		\item Integración de tipos estáticos comunes de Dart con las facetas de la desclasificación basada en tipos.
-		\item Definición de la gramática de tipos.
-		\item Descripción del paso de generación de restricciones para un programa Dart.
-		\alert{\item Descripción del paso de resolución de restricciones.}
-		\item Implementación de la extensión para ambientes de desarrollo.
-	\end{enumerate}
-\end{frame}
-
-\begin{frame}[fragile]{Resolución de restricciones}
-	Simplificación de restricciones \\
-	\only<2>{(Restricciones no simplificadas)}
-	\only<3>{(Restricciones no simplificadas con obvias marcadas)}
-	\only<4>{(Restricciones simplificadas)}
-\end{frame}
-
-\begin{frame}[fragile]{Resolución de restricciones}
-	Agrupación de restricciones \\
-	\only<1>{(Restricciones no agrupadas)}
-	\only<2>{(Marcar con distinto color las restricciones de un grupo u otro)}
-	\only<3>{(Restricciones agrupadas)}
-\end{frame}
-
-\begin{frame}[fragile]{Resolución de restricciones}
-	Unificación: Construcción de tipos \\
-	\only<1>{(Restricciones agrupadas)}
-	\only<2>{(Restricciones agrupadas con candidatos a construcción marcados)}
-	\only<3>{(Restricciones con nuevos tipos)}
-\end{frame}
-
-\begin{frame}[fragile]{Resolución de restricciones}
-	Unificación: Verificación de restricciones \\
-	\only<1>{(Restricciones)}
-	\only<2>{(Restricciones con relaciones inválidas que provienen de invocación a método marcadas)}
-	\only<3>{(Restricciones actualizadas luego de comprobación)}
-	\only<4>{(Restricciones con relaciones inválidas que no provienen de invocación a método marcadas)}
-	\only<5>{(Error generado por la restricción no válida)}
-\end{frame}
-
-\begin{frame}[fragile]{Resolución de restricciones}
-	Unificación: Substitución de restricciones resueltas \\
-	\only<1>{(Restricciones)}
-	\only<2>{(Restricciones con restricciones resueltas marcadas)}
-	\only<3>{(Substitución de restricciones)}
-\end{frame}
-
-\begin{frame}[fragile]{Resolución de restricciones}
-	Unificación: Algoritmo iterativo \\
-	\metroset{block=fill}
-	\begin{block}{Algoritmo de unificación}
-		(pseudocódigo del algoritmo)
-	\end{block}
-\end{frame}
-
-\begin{frame}[fragile]{Pasos de la solución}
-	\begin{enumerate}
-		\item Definición del subconjunto de Dart soportado.
-		\item Definición y declaración de facetas públicas en Dart.
-		\item Integración de tipos estáticos comunes de Dart con las facetas de la desclasificación basada en tipos.
-		\item Definición de la gramática de tipos.
-		\item Descripción del paso de generación de restricciones para un programa Dart.
-		\item Descripción del paso de resolución de restricciones.
-		\alert{\item Implementación de la extensión para ambientes de desarrollo.}
-	\end{enumerate}
-\end{frame}
+%
+% \begin{frame}[fragile]{Pasos de la solución}
+% 	\begin{enumerate}
+% 		\item Definición del subconjunto de Dart soportado.
+% 		\item Definición y declaración de facetas públicas en Dart.
+% 		\alert{\item Integración de tipos estáticos comunes de Dart con las facetas de la desclasificación basada en tipos.}
+% 		\item Definición de la gramática de tipos.
+% 		\item Descripción del paso de generación de restricciones para un programa Dart.
+% 		\item Descripción del paso de resolución de restricciones.
+% 		\item Implementación de la extensión para ambientes de desarrollo.
+% 	\end{enumerate}
+% \end{frame}
+%
+% \begin{frame}[fragile]{Conversión de tipos de Dart a facetas privadas}
+% 	\begin{onlyenv}<1>
+% 		(código donde se usan tipos definidos por el usuario y tipos de dart)
+% 	\end{onlyenv}
+% 	\begin{onlyenv}<2>
+% 		(código donde se usan tipos definidos por el usuario y tipos de dart, destacando tipo definido por el usuario)
+% 	\end{onlyenv}
+% 	\begin{onlyenv}<3>
+% 		(código donde se usan tipos definidos por el usuario y tipos de dart, destacando tipo estático común de dart)
+% 	\end{onlyenv}
+% \end{frame}
+%
+% \begin{frame}[fragile]{Conversión de tipos de Dart a facetas privadas}
+% 	\only<1->{(Mostrar operación de convert)}\\
+% 	\only<2>{$P_{Bi}$ (algo)}
+% 	\only<3>{$P_{Ai}$ (algo)}
+%
+% \end{frame}
+%
+% \begin{frame}[fragile]{Pasos de la solución}
+% 	\begin{enumerate}
+% 		\item Definición del subconjunto de Dart soportado.
+% 		\item Definición y declaración de facetas públicas en Dart.
+% 		\item Integración de tipos estáticos comunes de Dart con las facetas de la desclasificación basada en tipos.
+% 		\alert{\item Definición de la gramática de tipos.}
+% 		\item Descripción del paso de generación de restricciones para un programa Dart.
+% 		\item Descripción del paso de resolución de restricciones.
+% 		\item Implementación de la extensión para ambientes de desarrollo.
+% 	\end{enumerate}
+% \end{frame}
+%
+% \begin{frame}[fragile]{Gramática de tipos}
+% 	\metroset{block=fill}
+% 	\begin{block}{Gramática de tipos}
+% 		\[\mathtt{\tau := \alpha\ |\ Obj(\overline{l: \tau})\ |\ \overline{\tau} \rightarrow \tau \ |\ \tau \sqcap \tau\ |\ \tau \sqcup \tau\ |\ Bot\ |\ Top}\]
+% 	\end{block}
+% \end{frame}
+%
+% \begin{frame}[fragile]{Pasos de la solución}
+% 	\begin{enumerate}
+% 		\item Definición del subconjunto de Dart soportado.
+% 		\item Definición y declaración de facetas públicas en Dart.
+% 		\item Integración de tipos estáticos comunes de Dart con las facetas de la desclasificación basada en tipos.
+% 		\item Definición de la gramática de tipos.
+% 		\alert{\item Descripción del paso de generación de restricciones para un programa Dart.}
+% 		\item Descripción del paso de resolución de restricciones.
+% 		\item Implementación de la extensión para ambientes de desarrollo.
+% 	\end{enumerate}
+% \end{frame}
+%
+% \begin{frame}[fragile]{Generación de restricciones}
+% 	\begin{columns}[T,onlytextwidth]
+% 		\column{0.6\textwidth}
+% 		(Código con invocación a método y variables de tipo)
+% 		\column{0.4\textwidth}
+% 		(restricciones generadas)
+% 	\end{columns}
+% \end{frame}
+%
+% \begin{frame}[fragile]{Generación de restricciones}
+% 	\begin{columns}[T,onlytextwidth]
+% 		\column{0.6\textwidth}
+% 		(Código con expresión de retorno y variables de tipo)
+% 		\column{0.4\textwidth}
+% 		(restricciones generadas)
+% 	\end{columns}
+% \end{frame}
+%
+% \begin{frame}[fragile]{Generación de restricciones}
+% 	\begin{columns}[T,onlytextwidth]
+% 		\column{0.6\textwidth}
+% 		(Código con expresión de asignación y variables de tipo)
+% 		\column{0.4\textwidth}
+% 		(restricciones generadas)
+% 	\end{columns}
+% \end{frame}
+%
+% \begin{frame}[fragile]{Pasos de la solución}
+% 	\begin{enumerate}
+% 		\item Definición del subconjunto de Dart soportado.
+% 		\item Definición y declaración de facetas públicas en Dart.
+% 		\item Integración de tipos estáticos comunes de Dart con las facetas de la desclasificación basada en tipos.
+% 		\item Definición de la gramática de tipos.
+% 		\item Descripción del paso de generación de restricciones para un programa Dart.
+% 		\alert{\item Descripción del paso de resolución de restricciones.}
+% 		\item Implementación de la extensión para ambientes de desarrollo.
+% 	\end{enumerate}
+% \end{frame}
+%
+% \begin{frame}[fragile]{Resolución de restricciones}
+% 	Simplificación de restricciones \\
+% 	\only<2>{(Restricciones no simplificadas)}
+% 	\only<3>{(Restricciones no simplificadas con obvias marcadas)}
+% 	\only<4>{(Restricciones simplificadas)}
+% \end{frame}
+%
+% \begin{frame}[fragile]{Resolución de restricciones}
+% 	Agrupación de restricciones \\
+% 	\only<1>{(Restricciones no agrupadas)}
+% 	\only<2>{(Marcar con distinto color las restricciones de un grupo u otro)}
+% 	\only<3>{(Restricciones agrupadas)}
+% \end{frame}
+%
+% \begin{frame}[fragile]{Resolución de restricciones}
+% 	Unificación: Construcción de tipos \\
+% 	\only<1>{(Restricciones agrupadas)}
+% 	\only<2>{(Restricciones agrupadas con candidatos a construcción marcados)}
+% 	\only<3>{(Restricciones con nuevos tipos)}
+% \end{frame}
+%
+% \begin{frame}[fragile]{Resolución de restricciones}
+% 	Unificación: Verificación de restricciones \\
+% 	\only<1>{(Restricciones)}
+% 	\only<2>{(Restricciones con relaciones inválidas que provienen de invocación a método marcadas)}
+% 	\only<3>{(Restricciones actualizadas luego de comprobación)}
+% 	\only<4>{(Restricciones con relaciones inválidas que no provienen de invocación a método marcadas)}
+% 	\only<5>{(Error generado por la restricción no válida)}
+% \end{frame}
+%
+% \begin{frame}[fragile]{Resolución de restricciones}
+% 	Unificación: Substitución de restricciones resueltas \\
+% 	\only<1>{(Restricciones)}
+% 	\only<2>{(Restricciones con restricciones resueltas marcadas)}
+% 	\only<3>{(Substitución de restricciones)}
+% \end{frame}
+%
+% \begin{frame}[fragile]{Resolución de restricciones}
+% 	Unificación: Algoritmo iterativo \\
+% 	\metroset{block=fill}
+% 	\begin{block}{Algoritmo de unificación}
+% 		(pseudocódigo del algoritmo)
+% 	\end{block}
+% \end{frame}
+%
+% \begin{frame}[fragile]{Pasos de la solución}
+% 	\begin{enumerate}
+% 		\item Definición del subconjunto de Dart soportado.
+% 		\item Definición y declaración de facetas públicas en Dart.
+% 		\item Integración de tipos estáticos comunes de Dart con las facetas de la desclasificación basada en tipos.
+% 		\item Definición de la gramática de tipos.
+% 		\item Descripción del paso de generación de restricciones para un programa Dart.
+% 		\item Descripción del paso de resolución de restricciones.
+% 		\alert{\item Implementación de la extensión para ambientes de desarrollo.}
+% 	\end{enumerate}
+% \end{frame}
 
 \begin{frame}[fragile]{Extensión para ambientes de desarrollo}
 	\begin{center}
@@ -651,23 +717,49 @@ class Foo { !\pause!
 \end{frame}
 
 \begin{frame}[fragile]{Tipos de errores}
-	\texttt{SecurityError} \\ \pause
-	(código que genera una restricción inválida de esas)
+	Errores de seguridad \\ \pause
+	\vspace{1cm}
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+bool<bool login(String guess, @S("Top") String password) {
+  ?\colorbox{red!20}{return password.eq(guess);}?
+}
+\end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]{Tipos de errores}
-	\texttt{IllFormedTypeError} \\ \pause
-	(código que posee un tipo mal formado)
+	Errores de tipo mal formado \\ \pause
+	\vspace{1cm}
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+bool<Top login(String guess, ?\colorbox{red!20}{@S(\texttt{"}Abs") String password}?) {
+  return password.eq(guess);
+}
+
+abstract class Abs {
+  int abs();
+}
+\end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]{Tipos de errores}
-	\texttt{UndefinedFacetWarning} \\ \pause
-	(Código con faceta pública no definida)
+	Warning de faceta pública no definida \\ \pause
+	\vspace{1cm}
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+bool<bool login(String guess, ?\colorbox{yellow!50}{@S("StringEq")}? String password) {
+  return password.eq(guess);
+}
+\end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]{Tipos de errores}
-	\texttt{InferredFacetInfo} \\ \pause
-	(código con un tipo inferido)
+	Información de faceta pública inferida \\ \pause
+	\vspace{1cm}
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+bool<bool login(String<String guess, String ?\underline{password}?) {
+  return password.eq(guess);
+} ?\pause?
+
+password: [eq: String<String -> bool<bool]
+\end{lstlisting}
 \end{frame}
 
 \section{Validación}
@@ -679,39 +771,63 @@ class Foo { !\pause!
 \end{frame}
 
 \begin{frame}[fragile]{Ejemplo: Sistema de autenticación web}
-	(imagen en intelliJ definiendo la base de datos)
+	\begin{center}
+		\includegraphics[width=0.95\textwidth]{images/database.png}
+	\end{center}
 \end{frame}
 
 \begin{frame}[fragile]{Ejemplo: Sistema de autenticación web}
-	(imagen en intelliJ definiendo el metodo login)
+	\begin{center}
+		\includegraphics[width=1.0\textwidth]{images/login1.png}
+	\end{center}
 \end{frame}
 
 \begin{frame}[fragile]{Ejemplo: Sistema de autenticación web}
-	(imagen en intelliJ mostrando la inferencia)
+	\begin{center}
+		\includegraphics[width=1.0\textwidth]{images/login2.png}
+	\end{center}
 \end{frame}
 
 \begin{frame}[fragile]{Ejemplo: Sistema de autenticación web}
-	(imagen en intelliJ declarando una faceta pública no definida)
+	\begin{center}
+		\includegraphics[width=1.0\textwidth]{images/login25.png}
+	\end{center}
 \end{frame}
 
 \begin{frame}[fragile]{Ejemplo: Sistema de autenticación web}
-	(imagen en intelliJ con el warning sobre la faceta no definida)
+	\begin{center}
+		\includegraphics[width=1.0\textwidth]{images/login3.png}
+	\end{center}
 \end{frame}
 
 \begin{frame}[fragile]{Ejemplo: Sistema de autenticación web}
-	(imagen en intelliJ usando libreria html)
+	\begin{center}
+		\includegraphics[width=1.0\textwidth]{images/html1.png}
+	\end{center}
 \end{frame}
 
 \begin{frame}[fragile]{Ejemplo: Sistema de autenticación web}
-	(imagen en intelliJ agregando Top a variable de contraseña)
+	\begin{center}
+		\includegraphics[width=1.0\textwidth]{images/html2.png}
+	\end{center}
 \end{frame}
 
 \begin{frame}[fragile]{Ejemplo: Sistema de autenticación web}
-	(imagen en intelliJ del error de seguridad)
+	\begin{center}
+		\includegraphics[width=1.0\textwidth]{images/html3.png}
+	\end{center}
 \end{frame}
 
 \begin{frame}[fragile]{Ejemplo: Sistema de autenticación web}
-	(imagen en intelliJ corrigiendo el error)
+	\begin{center}
+		\includegraphics[width=1.0\textwidth]{images/html4.png}
+	\end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Ejemplo: Sistema de autenticación web}
+	\begin{center}
+		\includegraphics[width=1.0\textwidth]{images/html0.png}
+	\end{center}
 \end{frame}
 
 \begin{frame}[fragile]{Ejemplo: Sistema de autenticación web}
