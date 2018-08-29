@@ -216,13 +216,13 @@ String<String login(String<String guess, String<StringEq password) {
   if (password.eq(guess)) return "Login successful";
   else return "Login failed";
 }
-\end{lstlisting}
+\end{lstlisting} \pause
 
 \begin{itemize}
 	\item Tipos de dos facetas \texttt{String<StringEq} \pause
 	\item \texttt{StringEq = [eq: String<String -> Bool<Bool]} \pause
 	\item \texttt{String <: StringEq} (Tipo bien formado) \pause
-	\item No-interferencia relajada 
+	\item No-interferencia relajada
 \end{itemize}
 
 \end{frame}
@@ -263,7 +263,7 @@ String<String login(String<String guess, String<?\colorbox{orange!20}{Top}? pass
 \end{frame}
 
 \begin{frame}[fragile]{Problemas con la desclasificación basada en tipos}
-	\begin{itemize}
+	\begin{itemize} \pause
 		\item Propuesta sin implementación práctica. \pause
 		\item Anotación completa de facetas para realizar análisis. \pause
 	\end{itemize}
@@ -291,29 +291,57 @@ String login(String guess, String<StringEq password) {
 \section{Inferencia de tipos}
 
 \begin{frame}[fragile]{Inferencia de tipos}
+
+	\begin{columns}[T,onlytextwidth]
+		\column{0.6\textwidth}
 \begin{lstlisting}[basicstyle=\fontsize{9}{9}\ttfamily]
-calculate(c, n) {
+calculate(c, Int n) {
   if (c) return n*2;
   else return n*0.5;
 }
-\end{lstlisting}
+\end{lstlisting} \pause
+		\column{0.4\textwidth}
+		\begin{tikzpicture}[node distance=1.5cm]
+	    \node(Top) {\texttt{Top}};
+	    \node(num) [below right of=Top]												{\texttt{Num}};
+	    \node(int)		[below right of=num]			{\texttt{Int}};
+	    \node(float)					[below left of=num] 			{\texttt{Float}};
+	    \node(bool) [below left of=Top] {\texttt{Bool}};
+	    \draw (Top) -- (num);
+	    \draw (Top) -- (bool);
+	    \draw (num)      -- (int);
+	    \draw (num)      -- (float);
+	  \end{tikzpicture}
+	\end{columns}
 \end{frame}
 
 \begin{frame}[fragile]{Variables de tipo}
+	\begin{columns}[T,onlytextwidth]
+		\column{0.6\textwidth}
 \begin{lstlisting}[basicstyle=\fontsize{9}{9}\ttfamily]
-X calculate(Y c, Z n) {
+X calculate(Y c, Int n) {
   if (c) return n*2;
   else return n*0.5;
 }
 \end{lstlisting}
+\end{columns}
 \end{frame}
 
 \begin{frame}[fragile]{Generación de restricciones}
 	\begin{columns}[T,onlytextwidth]
 		\column{0.6\textwidth}
-		(codigo anotado con variables de tipo)
+\begin{lstlisting}[basicstyle=\fontsize{9}{9}\ttfamily]
+X calculate(Y c, Int n) {
+  if (c) return n*2;
+  else return n*0.5;
+}
+\end{lstlisting}
 		\column{0.4\textwidth}
-		(restricciones generadas)
+		\begin{enumerate} \pause
+			\item \texttt{Y <: Bool} \pause
+			\item \texttt{Int <: X} \pause
+			\item \texttt{Float <: X}
+		\end{enumerate}
 	\end{columns}
 \end{frame}
 
