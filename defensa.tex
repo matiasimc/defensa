@@ -1,9 +1,10 @@
-\documentclass[aspectratio=169,10pt]{beamer}
+\documentclass[aspectratio=169,18pt]{beamer}
 
 \usetheme[progressbar=frametitle]{metropolis}
 \usepackage{appendixnumberbeamer}
 \usepackage{tikz}
 \usetikzlibrary{positioning}
+\usetikzlibrary{arrows.meta}
 \usepackage{booktabs}
 \usepackage[scale=2]{ccicons}
 
@@ -22,7 +23,7 @@
 \usepackage{listings}
 \lstset{%
 	numberstyle=\tiny,
-	basicstyle=\fontsize{6.5}{8.3}\ttfamily,
+	basicstyle=\fontsize{8.6}{9}\ttfamily,
 	numbersep=15pt,tabsize=4,
 	flexiblecolumns=true,
 	keywordstyle=\color{blue},
@@ -92,79 +93,87 @@
 			\node(H) 												{\texttt{H}};
 			\node(L)      [below of=H]       {\texttt{L}};
 			\draw(H)      -- (L);
-		\end{tikzpicture} \\
-		Orden parcial de dos niveles
+		\only<2>{
+			\draw[-Latex] (-2,-1)--(-2,0) node[midway,left]{Flujo válido};
+			\draw[-Latex] (2,0)--(2,-1) node[midway,right]{Flujo inválido};
+		}
+		\end{tikzpicture}\ \\
+		\vspace{1cm}
+		Orden parcial de etiquetas
+	\end{center}
+
+\end{frame}
+
+\begin{frame}[fragile]{Control de flujo de información}
+	\begin{center}
+		\includegraphics[width=0.36\textwidth]{images/book.png}
 	\end{center}
 \end{frame}
 
 \begin{frame}[fragile]{Control de flujo de información}
-  \begin{columns}[T,onlytextwidth]
-    \column{0.25\textwidth}
-    \includegraphics[width=1.0\textwidth]{images/book.png}
-    \column{0.75\textwidth}
-    \vspace{1cm}
-    \begin{onlyenv}<1>
-      \begin{lstlisting}
-        String book(String username, int date, int cardNumber) {
-          return sendToHotel(username, date, cardNumber);
-        }
+  \begin{onlyenv}<1>
+    \begin{lstlisting}
+      String book(String username, int date, int cardNumber) {
+        return sendToHotel(username, date, cardNumber);
+      }
 
-        String sendToHotel(String username, int date, int cardNumber);
-        String sendToGoogle(String token, int xCoord, int yCoord);
-      \end{lstlisting}
-    \end{onlyenv}
-    \begin{onlyenv}<2>
-      \begin{lstlisting}[escapechar=?]
-        String book(String username, int date, int cardNumber) {
-          return ?\colorbox{yellow!50}{sendToGoogle}?(username, date, cardNumber);
-        }
+      String sendToHotel(String username, int date, int cardNumber);
+      String sendToGoogleMaps(String token, int xCoord, int yCoord);
+    \end{lstlisting}
+  \end{onlyenv}
+  \begin{onlyenv}<2>
+    \begin{lstlisting}[escapechar=?]
+      String book(String username, int date, int cardNumber) {
+        return ?\colorbox{yellow!50}{sendToGoogleMaps}?(username, date, cardNumber);
+      }
 
-        String sendToHotel(String username, int date, int cardNumber);
-        String sendToGoogle(String token, int xCoord, int yCoord);
-      \end{lstlisting}
-    \end{onlyenv}
+      String sendToHotel(String username, int date, int cardNumber);
+      String sendToGoogleMaps(String token, int xCoord, int yCoord);
+    \end{lstlisting}
+  \end{onlyenv}
 
-  \end{columns}
 \end{frame}
 
 \begin{frame}[fragile]{Tipado de seguridad para el control de flujo de información}
 
-  \begin{columns}[T,onlytextwidth]
-    \column{0.25\textwidth}
-    \includegraphics[width=1.0\textwidth]{images/book.png}
-    \column{0.75\textwidth}
-    \vspace{1cm}
-    \begin{onlyenv}<1>
-      \begin{lstlisting}
-        String@L book(String@L username, int@L date, int@H cardNumber) {
-          return sendToGoogle(username, date, cardNumber);
-        }
+  \begin{onlyenv}<1>
+    \begin{lstlisting}
+      String@L book(String@L username, int@L date, int@H cardNumber) {
+        return sendToGoogleMaps(username, date, cardNumber);
+      }
 
-        String@L sendToHotel(String@L username, int@L date, int@H cardNumber);
-        String@L sendToGoogle(String@H token, int@L xCoord, int@L yCoord);
-      \end{lstlisting}
-    \end{onlyenv}
-    \begin{onlyenv}<2>
-      \begin{lstlisting}[escapechar=?]
-        String@L book(String@L username, int@L date, int@H cardNumber) {
-          ?\colorbox{red!20}{return sendToGoogle(username, date, cardNumber);}?
-        }
+      String@L sendToHotel(String@L username, int@L date, int@H cardNumber);
+      String@L sendToGoogleMaps(String@H token, int@L xCoord, int@L yCoord);
+    \end{lstlisting}
+  \end{onlyenv}
+  \begin{onlyenv}<2>
+    \begin{lstlisting}[escapechar=?]
+      String@L book(String@L username, int@L date, int@H cardNumber) {
+        ?\colorbox{red!20}{return sendToGoogleMaps(username, date, cardNumber);}?
+      }
 
-        String@L sendToHotel(String@L username, int@L date, int@H cardNumber);
-        String@L sendToGoogle(String@H token, int@L xCoord, int@L yCoord);
-      \end{lstlisting}
-    \end{onlyenv}
-		\begin{onlyenv}<3>
-      \begin{lstlisting}[escapechar=?]
-        String@L book(String@L username, int@L date, int@H cardNumber) {
-          return sendToHotel(username, date, cardNumber);
-        }
+      String@L sendToHotel(String@L username, int@L date, int@H cardNumber);
+      String@L sendToGoogleMaps(String@H token, int@L xCoord, int@L yCoord);
+    \end{lstlisting} \pause
+		\begin{center}
+			\begin{tikzpicture}
+				\node(H) 												{\texttt{H}};
+				\node(L)      [below of=H]       {\texttt{L}};
+				\draw(H)      -- (L);
+				\draw[-Latex] (1,0)--(1,-1) node[midway,right]{Flujo inválido};
+			\end{tikzpicture}
+		\end{center}
+  \end{onlyenv}
+	\begin{onlyenv}<3>
+    \begin{lstlisting}[escapechar=?]
+      String@L book(String@L username, int@L date, int@H cardNumber) {
+        return sendToHotel(username, date, cardNumber);
+      }
 
-        String@L sendToHotel(String@L username, int@L date, int@H cardNumber);
-        String@L sendToGoogle(String@H token, int@L xCoord, int@L yCoord);
-      \end{lstlisting}
-    \end{onlyenv}
-  \end{columns}
+      String@L sendToHotel(String@L username, int@L date, int@H cardNumber);
+      String@L sendToGoogleMaps(String@H token, int@L xCoord, int@L yCoord);
+    \end{lstlisting}
+  \end{onlyenv}
 
 \end{frame}
 
@@ -177,11 +186,11 @@
 
 \begin{frame}[fragile]{Problema con no-interferencia}
 	\begin{center}
-\begin{lstlisting}[basicstyle=\fontsize{9}{9}\ttfamily]
-            String@L login(String@L guess, String@H password) {
-              if (password == guess) return "Login successful";
-              else return "Login failed";
-            }
+\begin{lstlisting}[basicstyle=\fontsize{10}{10}\ttfamily]
+          String@L login(String@L guess, String@H password) {
+            if (password == guess) return "Login successful";
+            else return "Login failed";
+          }
 \end{lstlisting} \pause
 		\vspace{3cm}
 		\alert{¡\textbf{No} cumple con no-interferencia!}
@@ -190,27 +199,25 @@
 
 \begin{frame}[fragile]{Desclasificación}
 	\begin{center}
-\begin{lstlisting}[basicstyle=\fontsize{9}{9}\ttfamily]
-            String@L login(String@L guess, String@H password) {
-              if (declassify(password == guess)) return "Login successful";
-              else return "Login failed";
-            }
+\begin{lstlisting}[basicstyle=\fontsize{10}{10}\ttfamily]
+String@L login(String@L guess, String@H password) {
+  if (declassify(password == guess)) return "Login successful";
+  else return "Login failed";
+}
 \end{lstlisting}
 	\end{center}
 \end{frame}
 
 \begin{frame}[fragile]{Problema con desclasificación}
 	\begin{center}
-\begin{lstlisting}[basicstyle=\fontsize{9}{9}\ttfamily]
-                                    declassify(password)
-\end{lstlisting} \pause
+		\texttt{declassify(password)} \\ \pause
 		\vspace{3cm}
 		\alert{¡Grave fuga de información!}
 	\end{center}
 \end{frame}
 
 \begin{frame}[fragile]{Desclasificación basada en tipos}
-\begin{lstlisting}[basicstyle=\fontsize{9}{9}\ttfamily]
+\begin{lstlisting}[basicstyle=\fontsize{9}{10}\ttfamily]
 String<String login(String<String guess, String<StringEq password) {
   if (password.eq(guess)) return "Login successful";
   else return "Login failed";
@@ -244,7 +251,7 @@ String<String login(String<String guess, String<StringEq password) {
 
 % \begin{frame}[fragile]{Regla principal de la desclasificación basada en tipos}
 % \begin{onlyenv}<1>
-% \begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+% \begin{lstlisting}[escapechar=?,basicstyle=\fontsize{10}{10}\ttfamily]
 % String<String login(String<String guess, String<?\colorbox{orange!20}{Top}? password) {
 %   if (?\colorbox{orange!20}{password.eq(guess)}?) return "Login successful";
 %   else return "Login failed";
@@ -252,7 +259,7 @@ String<String login(String<String guess, String<StringEq password) {
 % \end{lstlisting}
 % \end{onlyenv}
 % \begin{onlyenv}<2>
-% \begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+% \begin{lstlisting}[escapechar=?,basicstyle=\fontsize{10}{10}\ttfamily]
 % String<String login(String<String guess, String<?\colorbox{orange!20}{Top}? password) {
 %   if (?\colorbox{orange!20}{password.eq(guess)}?) ?\colorbox{red!20}{return "Login successful";}?
 %   else ?\colorbox{red!20}{return "Login failed";}?
@@ -263,12 +270,12 @@ String<String login(String<String guess, String<StringEq password) {
 
 \begin{frame}[fragile]{Problemas con la desclasificación basada en tipos}
 	\begin{itemize} \pause
-		\item Propuesta sin implementación práctica. \pause
-		\item Anotación completa de facetas para realizar análisis. \pause
+		\item Propuesta sin implementación práctica realista. \pause
+		\item Implementación realista debe permitir la omisión de facetas. \pause
 	\end{itemize}
 	\vspace{1cm}
 	\begin{onlyenv}<3>
-\begin{lstlisting}[basicstyle=\fontsize{9}{9}\ttfamily]
+\begin{lstlisting}[basicstyle=\fontsize{10}{10}\ttfamily]
 String<String login(String<String guess, String<StringEq password) {
   if (password.eq(guess)) return "Login successful";
   else return "Login failed";
@@ -277,7 +284,7 @@ String<String login(String<String guess, String<StringEq password) {
 
 	\end{onlyenv}
 	\begin{onlyenv}<4>
-\begin{lstlisting}[basicstyle=\fontsize{9}{9}\ttfamily]
+\begin{lstlisting}[basicstyle=\fontsize{10}{10}\ttfamily]
 String login(String guess, String<StringEq password) {
   if (password.eq(guess)) return "Login successful";
   else return "Login failed";
@@ -300,14 +307,14 @@ String login(String guess, String<StringEq password) {
 	Ejemplo 1 \\
 	\vspace{1cm}
 	\begin{onlyenv}<1>
-\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{10}{10}\ttfamily]
 bool login(String guess, String password) {
   return password.eq(guess);
 }
 \end{lstlisting}
 	\end{onlyenv}
 	\begin{onlyenv}<2>
-\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{10}{10}\ttfamily]
 bool login(String guess, String<?\alert{StringEq}? password) {
   return password.eq(guess);
 }
@@ -315,16 +322,31 @@ bool login(String guess, String<?\alert{StringEq}? password) {
 ?\alert{StringEq}? = [eq: String<String -> bool<bool]
 \end{lstlisting}
 	\end{onlyenv}
-\begin{onlyenv}<3>
-\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+	\begin{onlyenv}<3>
+	\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{10}{10}\ttfamily]
+bool login(String guess, String<StringEq password) {
+  return password.eq(guess);
+}
+\end{lstlisting}
+		\end{onlyenv}
+\begin{onlyenv}<4>
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{10}{10}\ttfamily]
 bool login(String<?\alert{String}? guess, String<StringEq password) {
   return password.eq(guess);
 }
 \end{lstlisting}
 Faceta pública de métodos que pertenecen a los tipos por defecto: $\mathtt{Bot\rightarrow Bot}$.
 	\end{onlyenv}
-	\begin{onlyenv}<4>
-\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+	\begin{onlyenv}<5>
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{10}{10}\ttfamily]
+bool login(String<String guess, String<StringEq password) {
+  return password.eq(guess);
+}
+\end{lstlisting}
+Faceta pública de métodos que pertenecen a los tipos por defecto: $\mathtt{Bot\rightarrow Bot}$.
+	\end{onlyenv}
+	\begin{onlyenv}<6>
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{10}{10}\ttfamily]
 bool<?\alert{X}? login(String<String guess, String<StringEq password) {
   return password.eq(guess);
 }
@@ -337,14 +359,14 @@ Faceta pública de métodos que pertenecen a los tipos por defecto: $\mathtt{Bot
 	Ejemplo 2 \\
 	\vspace{1cm}
 	\begin{onlyenv}<1>
-\begin{lstlisting}[basicstyle=\fontsize{9}{9}\ttfamily]
+\begin{lstlisting}[basicstyle=\fontsize{10}{10}\ttfamily]
 bool login(String<String guess, String<Top password) {
   return password.eq(guess);
 }
 \end{lstlisting}
 	\end{onlyenv}
 	\begin{onlyenv}<2>
-\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{10}{10}\ttfamily]
 bool<?\alert{Top}? login(String<String guess, String<Top password) {
   return password.eq(guess);
 }
@@ -372,7 +394,7 @@ bool<?\alert{Top}? login(String<String guess, String<Top password) {
 
 \begin{frame}[fragile]{Subconjunto soportado de Dart}
 	\begin{center}
-	\begin{lstlisting}[escapechar=!,basicstyle=\fontsize{9}{11}\ttfamily]
+	\begin{lstlisting}[escapechar=!,basicstyle=\fontsize{10}{10}\ttfamily]
 class Foo { !\pause!
   String foo(String a, String b) { !\pause!
     String s = "foo"; !\pause!
@@ -387,7 +409,7 @@ class Foo { !\pause!
 \begin{frame}[fragile]{Declaración de facetas públicas}
 	Uso de anotaciones de Dart para declarar las facetas públicas. \\ \pause
 	\vspace{1cm}
-\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{10}{10}\ttfamily]
 bool login(String guess, @S("StringEq") String password) {
   return password.eq(guess);
 }
@@ -397,7 +419,7 @@ bool login(String guess, @S("StringEq") String password) {
 \begin{frame}[fragile]{Definición de facetas públicas}
 	Uso de clases abstractas de Dart para definir las facetas públicas. \\ \pause
 	\vspace{1cm}
-\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{10}{10}\ttfamily]
 bool login(String guess, @S("StringEq") String password) {
   return password.eq(guess);
 }
@@ -410,14 +432,14 @@ abstract class StringEq {
 
 \begin{frame}[fragile]{Extensión para ambientes de desarrollo}
 	\begin{center}
-		\includegraphics[width=0.8\textwidth]{images/sequence.pdf}
+		\includegraphics[width=1.0\textwidth]{images/sequence.pdf}
 	\end{center}
 \end{frame}
 
 \begin{frame}[fragile]{Tipos de errores}
 	Errores de seguridad \\ \pause
 	\vspace{1cm}
-\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{10}{10}\ttfamily]
 bool<bool login(String guess, @S("Top") String password) {
   ?\colorbox{red!20}{return password.eq(guess);}?
 }
@@ -427,7 +449,7 @@ bool<bool login(String guess, @S("Top") String password) {
 \begin{frame}[fragile]{Tipos de errores}
 	Errores de tipo mal formado \\ \pause
 	\vspace{1cm}
-\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{10}{10}\ttfamily]
 bool<Top login(String guess, ?\colorbox{red!20}{@S(\texttt{"}Abs") String password}?) {
   return password.eq(guess);
 }
@@ -441,7 +463,7 @@ abstract class Abs {
 \begin{frame}[fragile]{Tipos de errores}
 	Warning de faceta pública no definida \\ \pause
 	\vspace{1cm}
-\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{10}{10}\ttfamily]
 bool<bool login(String guess, ?\colorbox{yellow!50}{@S("StringEq")}? String password) {
   return password.eq(guess);
 }
@@ -451,7 +473,7 @@ bool<bool login(String guess, ?\colorbox{yellow!50}{@S("StringEq")}? String pass
 \begin{frame}[fragile]{Tipos de errores}
 	Información de faceta pública inferida \\ \pause
 	\vspace{1cm}
-\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{10}{10}\ttfamily]
 bool<bool login(String<String guess, String ?\underline{password}?) {
   return password.eq(guess);
 } ?\pause?
@@ -547,7 +569,7 @@ password: [eq: String<String -> bool<bool]
 		\end{center}
 		\column{0.6\textwidth}
 		\vspace{2cm}
-		Código en repositorio GitHub~\cite{repotest}
+		Código en repositorio GitHub~\cite{repotest} \\ \url{http://github.com/matiasimc/secure-login-test}
 	\end{columns}
 
 \end{frame}
@@ -577,12 +599,7 @@ password: [eq: String<String -> bool<bool]
 \section{Conclusiones y trabajo futuro}
 
 \begin{frame}[fragile]{Conclusiones}
-	\begin{itemize}
-		\item Conexión entre abstracciones de tipo y relaciones de orden de etiquetas de seguridad. \pause
-		\item Integración de conceptos de control de flujo de información con infraestructuras existentes. \pause
-		\item Implementación para un subconjunto del lenguaje Dart que demuestra la utilidad de desclasificación basada en tipos.
-	\end{itemize}
-
+		Se materializó la propuesta de la desclasificación basada en tipos para casos realistas.
 \end{frame}
 
 \begin{frame}[fragile]{Trabajo futuro}
@@ -615,7 +632,7 @@ password: [eq: String<String -> bool<bool]
 \begin{frame}[fragile]{Inferencia de tipos en Scala}
 	\begin{columns}[T,onlytextwidth]
 		\column{0.6\textwidth}
-\begin{lstlisting}[language=Scala,basicstyle=\fontsize{9}{9}\ttfamily]
+\begin{lstlisting}[language=Scala,basicstyle=\fontsize{10}{10}\ttfamily]
 def mathFunction(n1: Int, n2: Float) = {
   val n = fact(n1);
   n + n2;
@@ -637,7 +654,7 @@ def fact(n: Int) : Int = {
 \begin{frame}[fragile]{Inferencia de tipos en OCaml}
 	\begin{columns}[T,onlytextwidth]
 		\column{0.6\textwidth}
-\begin{lstlisting}[language=ML,basicstyle=\fontsize{9}{9}\ttfamily]
+\begin{lstlisting}[language=ML,basicstyle=\fontsize{10}{10}\ttfamily]
 # let average a b =
     (a +. b) /. 2.0;;
 
@@ -655,7 +672,7 @@ val average : float -> float -> float
 
 	\begin{columns}[T,onlytextwidth]
 		\column{0.6\textwidth}
-\begin{lstlisting}[basicstyle=\fontsize{9}{9}\ttfamily]
+\begin{lstlisting}[basicstyle=\fontsize{10}{10}\ttfamily]
 calculate(c, Int n) {
   if (c) return n*2;
   else return n*0.5;
@@ -679,7 +696,7 @@ calculate(c, Int n) {
 \begin{frame}[fragile]{Variables de tipo}
 	\begin{columns}[T,onlytextwidth]
 		\column{0.6\textwidth}
-\begin{lstlisting}[basicstyle=\fontsize{9}{9}\ttfamily]
+\begin{lstlisting}[basicstyle=\fontsize{10}{10}\ttfamily]
 X calculate(Y c, Int n) {
   if (c) return n*2;
   else return n*0.5;
@@ -691,7 +708,7 @@ X calculate(Y c, Int n) {
 \begin{frame}[fragile]{Generación de restricciones}
 	\begin{columns}[T,onlytextwidth]
 		\column{0.6\textwidth}
-\begin{lstlisting}[basicstyle=\fontsize{9}{9}\ttfamily]
+\begin{lstlisting}[basicstyle=\fontsize{10}{10}\ttfamily]
 X calculate(Y c, Int n) {
   if (c) return n*2;
   else return n*0.5;
@@ -710,14 +727,14 @@ X calculate(Y c, Int n) {
 	Ejemplo 3 \\
 	\vspace{1cm}
 	\begin{onlyenv}<1>
-\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{10}{10}\ttfamily]
 bool<bool login(int<int guess, String password) {
   return password.hash().eq(guess);
 }
 \end{lstlisting}
 	\end{onlyenv}
 	\begin{onlyenv}<2>
-\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{10}{10}\ttfamily]
 bool<bool login(String<String guess, String<?\alert{StringHash}? password) {
   return password.hash().eq(guess);
 }
@@ -726,7 +743,7 @@ bool<bool login(String<String guess, String<?\alert{StringHash}? password) {
 \end{lstlisting}
 	\end{onlyenv}
 	\begin{onlyenv}<3>
-\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{9}{9}\ttfamily]
+\begin{lstlisting}[escapechar=?,basicstyle=\fontsize{10}{10}\ttfamily]
 bool<bool login(String<String guess, String<?\alert{StringHash}? password) {
   return password.hash().eq(guess);
 }
