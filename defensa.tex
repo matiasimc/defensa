@@ -79,26 +79,22 @@
   \end{columns}
 \end{frame}
 
-\begin{frame}[fragile]{Seguridad basada en el lenguaje: Tipado de seguridad}
-	\begin{columns}[T,onlytextwidth]
-		\column{0.5\textwidth}
-		\includegraphics[width=0.8\textwidth]{images/lbs.png}
-		\column{0.5\textwidth}
-		\begin{lstlisting}[basicstyle=\fontsize{6.3}{8}\ttfamily]
-String@L login(String@L guess, String@H password) {
-  if (password == guess) return "Login successful";
-  else return "Login failed";
-}
-    \end{lstlisting}
-		\begin{center}
-			\begin{tikzpicture}
-				\node(H) 												{\texttt{H}};
-				\node(L)      [below of=H]       {\texttt{L}};
-				\draw(H)      -- (L);
-			\end{tikzpicture} \\
-			Orden parcial de dos niveles
-		\end{center}
-	\end{columns}
+\begin{frame}[fragile]{Seguridad basada en el lenguaje}
+	\begin{center}
+		\includegraphics[width=0.4\textwidth]{images/lbs.png}
+	\end{center}
+\end{frame}
+
+
+\begin{frame}[fragile]{Tipado de seguridad}
+	\begin{center}
+		\begin{tikzpicture}
+			\node(H) 												{\texttt{H}};
+			\node(L)      [below of=H]       {\texttt{L}};
+			\draw(H)      -- (L);
+		\end{tikzpicture} \\
+		Orden parcial de dos niveles
+	\end{center}
 \end{frame}
 
 \begin{frame}[fragile]{Control de flujo de información}
@@ -186,7 +182,7 @@ String@L login(String@L guess, String@H password) {
               if (password == guess) return "Login successful";
               else return "Login failed";
             }
-\end{lstlisting}
+\end{lstlisting} \pause
 		\vspace{3cm}
 		\alert{¡\textbf{No} cumple con no-interferencia!}
 	\end{center}
